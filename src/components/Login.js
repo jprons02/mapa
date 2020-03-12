@@ -10,7 +10,7 @@ const Login = (props) => {
 
     return (
         <Menu.Item name='features' onClick={(e) => handleClick(e)}>
-            Login
+            {props.isSignedIn ? "Logout" : "Login"}
         </Menu.Item>
     );
 }

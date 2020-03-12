@@ -1,19 +1,19 @@
 import React from 'react'
 import { Dropdown, Menu } from 'semantic-ui-react'
-import {Link} from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 import Login from './Login';
 import { connect } from 'react-redux';
 
 const Navigation = (props) => {
 
-    console.log(props);
-
     return (
       <Menu size='large' stackable>
-        <Menu.Item>
-          <img alt="logo" src='https://react.semantic-ui.com/logo.png' />
-        </Menu.Item>
+        <Link to="/">  
+            <Menu.Item>
+                <img alt="logo" src='https://react.semantic-ui.com/logo.png' />
+            </Menu.Item>
+        </Link>
 
         <Menu.Menu position='right'>
 
