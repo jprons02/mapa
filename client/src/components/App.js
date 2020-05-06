@@ -1,23 +1,28 @@
 import React from 'react';
 import {BrowserRouter, Route} from 'react-router-dom';
+import {connect} from 'react-redux';
 
 import Header from './Header';
+import Login from './Login';
+import Home from './Home';
 import AdminTools from './AdminTools';
 import MediaList from './MediaList';
 import Upload from './Upload';
 
-const Landing = () => <h2>Landing</h2>
 
 class App extends React.Component {
+
     render() {
+        console.log(this.props);
         return (
             <div>
                 <div className="container">
                     <BrowserRouter>
                         <Header />
                         <div>
+                            <Route exact path="/login" component={Login} />
                             <Route exact path="/admintools" component={AdminTools} />
-                            <Route exact path="/" component={Landing} />
+                            <Route exact path="/" component={Home} />
                             <Route exact path="/media" component={MediaList} />
                             <Route exact path="/upload" component={Upload} />
                         </div>
@@ -28,4 +33,9 @@ class App extends React.Component {
     }
 }
 
-export default App;
+const mapStateToProps = (state) => {
+    //const {isSignedIn} = state;
+    return state;
+}
+
+export default connect(mapStateToProps)(App);

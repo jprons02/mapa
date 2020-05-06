@@ -4,27 +4,24 @@ const UserAdmin = mongoose.model('UserAdmin');
 
 //fetch user and test password verification
 module.exports = app => {
-    app.use('/api/login', (req, res) => {
-        UserAdmin.findOne({username: req.body.loginId}, (err, user) => {
+    app.post('/api/login', (req, res) => {
+        UserAdmin.findOne({username: req.body.username}, (err, user) => {
             if (err) throw err;
             
             if(!user) {
-                res.send('wrong login...');
+                res.send(false);
                 return;
             }
             
-            console.log('the user is: ' + user);
-
             //test a matching password
-            user.comparePassword(req.body.loginPassword, (err, isMatch) => {
+            user.comparePassword(req.body.password, (err, isMatch) => {
                 if (err) throw err;
-                console.log(req.body.loginPassword, isMatch);
+                //handle what to do if password matches on front end. No if statement here, just send response (true or false).
+                res.send({
+                    username: req.body.username,
+                    isMatch
+                });
 
-                if(isMatch) {
-                    res.send('Welcome, admin.');
-                } else {
-                    res.redirect('/');
-                }
             })
         })
     });
