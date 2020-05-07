@@ -1,11 +1,8 @@
 import React from 'react';
 import {connect} from 'react-redux';
+import {Link} from 'react-router-dom';
 
 class Header extends React.Component {
-
-    //render home, media for "user"
-    //render above + upload for "design"
-    //render all for "admin"
     renderHeader = () => {
         const user = this.props.isSignedIn.username;
         const signedIn = this.props.isSignedIn.isMatch;
@@ -14,11 +11,14 @@ class Header extends React.Component {
         if(user === 'admin' && signedIn === true) {
             return (
                 <div>
-                    <li><a href="/login">Login</a></li>
-                    <li><a href="/">Home</a></li>
-                    <li><a href="/admintools">Admin Tools</a></li>
-                    <li><a href="/media">Media</a></li>
-                    <li><a href="/upload">Upload</a></li>
+                    <ul>
+                        <li><Link to="/login">Login</Link></li>
+                        <li><Link to="/">Home</Link></li>
+                        <li><Link to="/admintools">Admin Tools</Link></li>
+                        <li><Link to="/media">Media</Link></li>
+                        <li><Link to="/upload">Upload</Link></li>
+                        <li><button>Logout</button></li>
+                    </ul>
                 </div>
             )
         }
@@ -27,10 +27,13 @@ class Header extends React.Component {
         if(user === 'design' && signedIn === true) {
             return (
                 <div>
-                    <li><a href="/login">Login</a></li>
-                    <li><a href="/">Home</a></li>
-                    <li><a href="/media">Media</a></li>
-                    <li><a href="/upload">Upload</a></li>
+                    <ul>
+                        <li><Link to="/login">Login</Link></li>
+                        <li><Link to="/">Home</Link></li>
+                        <li><Link to="/media">Media</Link></li>
+                        <li><Link to="/upload">Upload</Link></li>
+                        <li><button>Logout</button></li>
+                    </ul>
                 </div>
             )
         }
@@ -39,13 +42,17 @@ class Header extends React.Component {
         if(user === 'media' && signedIn === true) {
             return (
                 <div>
-                    <li><a href="/login">Login</a></li>
-                    <li><a href="/">Home</a></li>
-                    <li><a href="/media">Media</a></li>
+                    <ul>
+                        <li><Link to="/login">Login</Link></li>
+                        <li><Link to="/">Home</Link></li>
+                        <li><Link to="/media">Media</Link></li>
+                        <li><button>Logout</button></li>
+                    </ul>
                 </div>
             )
         }
     }
+
 
     render() {
         return (
@@ -53,16 +60,6 @@ class Header extends React.Component {
                 {this.renderHeader()}
             </div>
         )
-        /*(
-            <div>
-                <ul>
-                    <li><a href="/login">Login</a></li>
-                    <li><a href="/">Home</a></li>
-                    <li><a href="/media">Media</a></li>
-                    <li><a href="/upload">Upload</a></li>
-                </ul>
-            </div>
-        )*/
     }
 }
 
