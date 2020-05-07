@@ -27,24 +27,31 @@ class MediaList extends React.Component {
         );
     }
     
+    
     /*
     //working out sorting files...
-    renderList = () => {
-        return (
-            this.props.mediaList.entries.map((listItem) => {
-                const english = [];
-                const spanish = [];
-                const englishRegex = '';
-                const spanishRegex = '';
+    sortItems = () => {
+        const englishMediaList = [];
+        const spanishMediaList = [];
+        const spanishRegex = '';
 
-                if(listItem.path_lower === true) {
-                    return null;
-                }
-                
-            })
-        );
+        //create english and spanish lists
+        this.props.mediaList.entries.map((listItem) => {
+            if(spanishRegex.test(listItem.path_lower)) {
+                spanishMediaList.push(listItem);
+            } else {
+                englishMediaList.push(listItem);
+            }
+        })
+    }
+
+
+    renderEnglishMedia = () => {
+
     }
     */
+
+
 
     render() {
         console.log(this.props.mediaList);
