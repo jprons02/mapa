@@ -46,7 +46,9 @@ module.exports = app => {
     //list contents of specified folder
     app.get('/api/list-content/:folder', async (req, res, next) => {
         const url = 'https://api.dropboxapi.com/2/files/list_folder';
-        const data = {'path': `/${req.params.folder}`};
+        const data = {
+            'path': `/${req.params.folder}`
+        };
         const config = {
             headers: {
                 'Content-Type': 'application/json',

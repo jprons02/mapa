@@ -13,7 +13,6 @@ import Upload from './Upload';
 class App extends React.Component {
 
     render() {
-        console.log(this.props);
         return (
             <div>
                 <div className="container">
@@ -34,7 +33,6 @@ class App extends React.Component {
 }
 
 const mapStateToProps = (state) => {
-    //const {isSignedIn} = state;
     return state;
 }
 

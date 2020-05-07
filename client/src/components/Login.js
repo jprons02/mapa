@@ -31,10 +31,10 @@ class Login extends React.Component {
             <div>
                 <form>
                     <label>Login: </label>
-                    <input id="username" type="text" name="loginId" placeholder="ID" required />
+                    <input id="username" type="text" name="loginId" placeholder="ID" />
                     <br />
                     <label>Password: </label>
-                    <input id="password" type="password" name="loginPassword" placeholder="Password" required />
+                    <input id="password" type="password" name="loginPassword" placeholder="Password" />
                     <br />
                     <input onClick={this.submit} type="submit" value="Submit" />
                 </form>
