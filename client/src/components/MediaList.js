@@ -4,64 +4,122 @@ import {fetchList} from '../actions'
 
 class MediaList extends React.Component {
 
-    //determine type of file and organize as such.
-
     componentDidMount() {
         this.props.fetchList();
     }
 
-    //need for logos, tv spots, radio spots, web banners.
-    //also, spanish or english.
-    //this.props.mediaList.entries[0].path_lower... do some regex to sort by language and file type.
-
-    
-    renderList = () => {
-        return (
-            this.props.mediaList.entries.map((listItem) => {
-                return (
-                    <li key={listItem.id}>
-                        <a href={`/api/download${listItem.path_lower}`}>{listItem.name}</a>
-                    </li>      
-                )
-            })
-        );
+    componentDidUpdate() {
+        //determine type of file and organize as such.
+        this.sortItems();
     }
-    
-    
-    /*
-    //working out sorting files...
+
+
+    //Sort files by language and by type. Using regex for both. 
+    //Regex for language: beginning of file MUST be named sp_ to find spanish files, default is english. 
+    //example: sp_mediafile.jpb. "sp" is case insensitive.
     sortItems = () => {
+        let newMediaObj = {};
         const englishMediaList = [];
         const spanishMediaList = [];
-        const spanishRegex = '';
-
-        //create english and spanish lists
+        const spanishRegex = /^sp_/i;
+        
+        //sort by language
         this.props.mediaList.entries.map((listItem) => {
-            if(spanishRegex.test(listItem.path_lower)) {
+            if(spanishRegex.test(listItem.name)) {
                 spanishMediaList.push(listItem);
             } else {
                 englishMediaList.push(listItem);
             }
-        })
+        });
+        
+        //sort by media type
+        const mediaType = (languageList) => {
+            const videoRegex = /((.mp4$)|(.wmv$)|(.mov$))/gmi;
+            const audioRegex = /((.mp3$)|(.m4a$)|(.wav$))/gmi;
+            const imageRegex = /((.png$)|(.jpg$))/gmi;
+            const videoList = [];
+            const audioList = [];
+            const imageList = [];
+            languageList.map((listItem) => {
+                switch (true) {
+                    case videoRegex.test(listItem.name):
+                        videoList.push(listItem);
+                        break;
+                    case audioRegex.test(listItem.name):
+                        audioList.push(listItem);
+                        break;
+                    case imageRegex.test(listItem.name):
+                        imageList.push(listItem);
+                        break;
+                }
+            });
+
+            return {
+                video: videoList,
+                audio: audioList,
+                image: imageList
+            }
+        }
+        
+        newMediaObj = {
+            english: mediaType(englishMediaList),
+            spanish: mediaType(spanishMediaList)
+        }        
+        return newMediaObj;
     }
 
-
-    renderEnglishMedia = () => {
-
-    }
-    */
-
-
-
-    render() {
-        console.log(this.props.mediaList);
-        return ( 
+    
+    renderList = (language) => {
+        return (
             <div>
-                <h1>Media</h1>
+                <h3>Videos</h3>
                 <ul>
-                    {this.props.mediaList.entries ? this.renderList() : "Loading..."}
+                    {this.sortItems()[language].video.map((listItem) => {
+                        return (
+                            <li key={listItem.id}>
+                                <a href={`/api/download${listItem.path_lower}`}>{listItem.name}</a>
+                            </li>
+                        )
+                    })}
+                </ul>
+                <h3>Audio</h3>
+                <ul>
+                    {this.sortItems()[language].audio.map((listItem) => {
+                        return (
+                            <li key={listItem.id}>
+                                <a href={`/api/download${listItem.path_lower}`}>{listItem.name}</a>
+                            </li>
+                        )
+                    })}
+                </ul>
+                <h3>Image</h3>
+                <ul>
+                    {this.sortItems()[language].image.map((listItem) => {
+                        return (
+                            <li key={listItem.id}>
+                                <a href={`/api/download${listItem.path_lower}`}>{listItem.name}</a>
+                            </li>
+                        )
+                    })}
                 </ul>
             </div>
+        )
+    }
+    
+    
+    render() {
+        return ( 
+            <div>
+                <div>
+                    <h2>English</h2>
+                    {this.props.mediaList.entries ? this.renderList("english") : "loading list..."}
+                </div>
+                <div>
+                    <h2>Spanish</h2>
+                    {this.props.mediaList.entries ? this.renderList("spanish") : "loading list..."}
+                </div>
+            </div>
+            
         )
     }
 }
