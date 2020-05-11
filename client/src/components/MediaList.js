@@ -108,6 +108,7 @@ class MediaList extends React.Component {
     
     
     render() {
+        console.log(this.props.mediaList);
         return ( 
             <div>
                 <div>

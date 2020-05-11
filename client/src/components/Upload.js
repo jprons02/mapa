@@ -21,19 +21,44 @@ axios.post('http://example.org/endpoint', form, {
 class Upload extends React.Component {
 
     uploadFile = async () => {
+        console.log("uploadFile() fired.");
         if(this.props.selectedFile.name) {
+
+            ////////////////////////////
+            //https://stackoverflow.com/questions/56531921/how-to-convert-a-formdata-object-to-binary-in-javascript
+            //https://developer.mozilla.org/en-US/docs/Web/API/FileReader/readAsBinaryString
+            function getBinaryFromFile(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
             
-            const url = `/api/upload/${this.props.selectedFile.name}`;
+                    reader.addEventListener("load", () => resolve(reader.result));
+                    reader.addEventListener("error", err => reject(err));
+            
+                    reader.readAsBinaryString(file);
+                });
+            }
+            //////////////////////////////
+
+            
+            const url = '/api/upload';
             const data = new FormData();
             data.append('file', this.props.selectedFile);
-            const config = {
-                headers: data.getHeaders()
-            };
+
             
-            const response = await axios.post(url, data, config);
-            console.log("data is this: " + data);
-            console.log("statusText is this: " + response.statusText);
-            console.log("response.data is this: " + response.data);
+
+            console.log(data.get('file'));
+
+            const response = await axios({
+                method: 'POST',
+                url: url,
+                headers: {
+                    'content-type': 'multipart/form-data'
+                },
+                data: data.get('file')
+            })
+
+            console.log(response.statusText);
+            console.log(response.data);
             
 
             ////////
