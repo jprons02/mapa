@@ -21,13 +21,15 @@ axios.post('http://example.org/endpoint', form, {
 class Upload extends React.Component {
 
     uploadFile = async () => {
-        console.log("uploadFile() fired.");
         if(this.props.selectedFile.name) {
 
+            console.log("uploadFile() fired.");
+
+            /*
             ////////////////////////////
             //https://stackoverflow.com/questions/56531921/how-to-convert-a-formdata-object-to-binary-in-javascript
             //https://developer.mozilla.org/en-US/docs/Web/API/FileReader/readAsBinaryString
-            function getBinaryFromFile(file) {
+            const getBinaryFromFile = (file) => {
                 return new Promise((resolve, reject) => {
                     const reader = new FileReader();
             
@@ -38,27 +40,48 @@ class Upload extends React.Component {
                 });
             }
             //////////////////////////////
-
+            */
+            /*
+            let formData = new FormData(); // instantiate it
+            // suppose you have your file ready
+            formData.set('file', this.props.selectedFile);
+            console.log(formData);
+            */
+            //console.log(this.props.selectedFile);
             
             const url = '/api/upload';
-            const data = new FormData();
-            data.append('file', this.props.selectedFile);
+            // Get binary without ugly callbacks using ES7
+            async function getBinaryFromFile(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+
+                    reader.addEventListener("load", () => resolve(reader.result));
+                    reader.addEventListener("error", err => reject(err));
+
+                    reader.readAsBinaryString(file);
+                });
+            }
+
+            // Usage - binary shows file contents!!!! WORKING!!!
+            var file = this.props.selectedFile,
+                binary = await getBinaryFromFile(file);
+
 
             
-
-            console.log(data.get('file'));
-
             const response = await axios({
                 method: 'POST',
                 url: url,
                 headers: {
-                    'content-type': 'multipart/form-data'
+                    'content-type': 'application/octet-stream'
                 },
-                data: data.get('file')
+                //data: binary
+                data: this.props.selectedFile
             })
 
             console.log(response.statusText);
             console.log(response.data);
+            
+            
             
 
             ////////
@@ -81,7 +104,8 @@ class Upload extends React.Component {
     }
 
     render() {
-        console.log(this.props);
+        //console.log(this.props);
+        //if(this.props.selectedFile) {console.log(this.props.selectedFile)}
         return (
             <div>
                 <h1>Upload File</h1>

@@ -73,7 +73,35 @@ module.exports = app => {
 
         const url = 'https://content.dropboxapi.com/2/files/upload';
         
+        
         try {
+
+            
+            //////////////
+            // output the headers
+            /*
+            console.log(req.headers);
+
+            // capture the encoded form data
+            req.on('data', (data) => {
+                console.log(data.toString());
+            });
+
+            // send a response when finished reading
+            // the encoded form data
+            req.on('end', () => {
+                res.send('ok');
+            });
+            */
+            /////////////////
+            req.on('data', (data) => {
+                console.log(data.toString());
+            });
+            
+
+            
+            
+            /*
             const response = await axios({
                 method: 'POST',
                 url: url,
@@ -84,7 +112,7 @@ module.exports = app => {
                     //ref for json.stringify: 
                     //https://www.dropboxforum.com/t5/Dropbox-API-Support-Feedback/quot-Dropbox-API-Arg-quot-could-not-decode-input-as-JSON/td-p/288054
                     'Dropbox-API-Arg': JSON.stringify({
-                        'path': '/media/test_4.txt',
+                        'path': '/media/test_7.txt',
                         'mode': 'add',
                         'autorename': true,
                         'mute': false,
@@ -95,10 +123,12 @@ module.exports = app => {
                 //data:  '@/files/test_2.txt'//filepath from where you are uploading.
                 
                 //testing: 
-                data:  `@${req.body}`
+                data: req.data
             })
-            console.log(req.body);
             res.send(response.data);
+            */
+            
+            
         }
         
         catch(error) {
