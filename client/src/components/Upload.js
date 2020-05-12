@@ -50,6 +50,10 @@ class Upload extends React.Component {
             //console.log(this.props.selectedFile);
             
             const url = '/api/upload';
+
+            /*I dont think this is doing anything... i think
+            the file is already in binary when setting the content-type
+            in axios to octet-stream.
             // Get binary without ugly callbacks using ES7
             async function getBinaryFromFile(file) {
                 return new Promise((resolve, reject) => {
@@ -65,6 +69,7 @@ class Upload extends React.Component {
             // Usage - binary shows file contents!!!! WORKING!!!
             var file = this.props.selectedFile,
                 binary = await getBinaryFromFile(file);
+            */
 
 
             
