@@ -8,15 +8,29 @@ class Upload extends React.Component {
 
     uploadFile = async () => {
         if(this.props.selectedFile.name) {
+            //need to use FormData for backend Multer middleware.
+            //let formData = new FormData();
+            //formData.append('file', this.props.selectedFile);
             
+            /*
+            how to console log formdata:
+            for (var value of formData.values()) {
+                console.log(value); 
+            }
+            */
+
             const url = `/api/upload/${this.props.selectedFile.name}/${this.props.selectedFile.size}`;
+            
+
             const response = await axios({
                 method: 'POST',
                 url: url,
                 headers: {
-                    'content-type': 'application/octet-stream'
+                    'content-type': 'application/octet-stream' //working without multer
+                    //'content-type': 'multipart/form-data'
                 },
-                data: this.props.selectedFile
+                data: this.props.selectedFile //working without multer
+                //data: formData
             })
             console.log(response.statusText);
         }
