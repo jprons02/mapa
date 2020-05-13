@@ -44,6 +44,8 @@ class Upload extends React.Component {
             const data = new FormData();
             data.append('file', this.props.selectedFile);
 
+            const dataValue = data.get('file');
+
             
 
             console.log(data.get('file'));
