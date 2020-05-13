@@ -73,7 +73,47 @@ module.exports = app => {
 
         const url = 'https://content.dropboxapi.com/2/files/upload';
         
+        //https://spin.atomicobject.com/2015/10/03/remote-pfs-node-js-express/
+        //if i can pass data variable to data in axios call, i might have it done.
+        //https://nodejs.org/fr/docs/guides/anatomy-of-an-http-transaction/
+        //echo server?
+        let data = [];
+        req.on('data', chunk => {
+            data.push(chunk);
+        });
+        req.on('end', () => {
+            data = Buffer.concat(data);
+            console.log(data);
+        })
+        
+        
+        
         try {
+        
+        //need a better way to wait for data to populate. if statement not good.
+        if(data !== []) {    
+            
+
+            //////////////
+            // output the headers
+            /*
+            console.log(req.headers);
+
+            // capture the encoded form data
+            req.on('data', (data) => {
+                console.log(data.toString());
+            });
+
+            // send a response when finished reading
+            // the encoded form data
+            req.on('end', () => {
+                res.send('ok');
+            });
+            */
+            /////////////////
+            
+            
+            
             const response = await axios({
                 method: 'POST',
                 url: url,
@@ -84,7 +124,7 @@ module.exports = app => {
                     //ref for json.stringify: 
                     //https://www.dropboxforum.com/t5/Dropbox-API-Support-Feedback/quot-Dropbox-API-Arg-quot-could-not-decode-input-as-JSON/td-p/288054
                     'Dropbox-API-Arg': JSON.stringify({
-                        'path': '/media/test_5.txt',
+                        'path': '/media/test_7.txt',
                         'mode': 'add',
                         'autorename': true,
                         'mute': false,
@@ -95,10 +135,12 @@ module.exports = app => {
                 //data:  '@/files/test_2.txt'//filepath from where you are uploading.
                 
                 //testing: 
-                data:  `@${req.body}`
+                data: data.data //this variable needs to wait for req.on('data')
             })
-            console.log(req.body);
             res.send(response.data);
+
+        }
+            
         }
         
         catch(error) {
