@@ -67,86 +67,50 @@ module.exports = app => {
 
 
 
-    //upload file
+    //upload file < 150MB
     //https://stackoverflow.com/questions/40114056/how-to-use-dropbox-upload-session-for-files-larger-than-150mb
-    app.post('/api/upload', async (req, res, next) => {
+    app.post('/api/upload/:file/:size', (req, res, next) => {
 
         const url = 'https://content.dropboxapi.com/2/files/upload';
+        console.log(req.params.file);
+        console.log(req.params.size);
         
-        //https://spin.atomicobject.com/2015/10/03/remote-pfs-node-js-express/
-        //if i can pass data variable to data in axios call, i might have it done.
-        //https://nodejs.org/fr/docs/guides/anatomy-of-an-http-transaction/
-        //echo server?
+        //req.on listens for streamed data from client and pushes it all into "data" variable
+        //req.on help tutorials: https://spin.atomicobject.com/2015/10/03/remote-pfs-node-js-express/
         let data = [];
         req.on('data', chunk => {
             data.push(chunk);
         });
-        req.on('end', () => {
+        req.on('end', async () => {
             data = Buffer.concat(data);
-            console.log(data);
+            //data variable is done being created, call axios to send to dropbox api.
+            try {
+                const response = await axios({
+                    method: 'POST',
+                    url: url,
+                    headers: {
+                        'Content-Type': 'application/octet-stream',
+                        'Authorization': `Bearer ${dropboxAccessToken}`,
+                        //JSON.stringify needed because dropbox api requires "Dropbox-API-Arg" value to be JSON.
+                        //ref for json.stringify: https://www.dropboxforum.com/t5/Dropbox-API-Support-Feedback/quot-Dropbox-API-Arg-quot-could-not-decode-input-as-JSON/td-p/288054
+                        'Dropbox-API-Arg': JSON.stringify({
+                            //'path': '/media/test_7.txt',
+                            'path': `/media/${req.params.file}`,
+                            'mode': 'add',
+                            'autorename': true,
+                            'mute': false,
+                            'strict_conflict': false
+                        })
+                    },
+                    //data:  '@/files/test_2.txt'//this is working for local file. filepath from where you are uploading. 
+                    data: data
+                })
+                res.send(response.data);
+            }
+            catch(error) {
+                res.send(error.response.data);
+            }
         })
-        
-        
-        
-        try {
-        
-        //need a better way to wait for data to populate. if statement not good.
-        if(data !== []) {    
-            
-
-            //////////////
-            // output the headers
-            /*
-            console.log(req.headers);
-
-            // capture the encoded form data
-            req.on('data', (data) => {
-                console.log(data.toString());
-            });
-
-            // send a response when finished reading
-            // the encoded form data
-            req.on('end', () => {
-                res.send('ok');
-            });
-            */
-            /////////////////
-            
-            
-            
-            const response = await axios({
-                method: 'POST',
-                url: url,
-                headers: {
-                    'Content-Type': 'application/octet-stream',
-                    'Authorization': `Bearer ${dropboxAccessToken}`,
-                    //JSON.stringify needed because Dropbox-API-Arg value has to be JSON.
-                    //ref for json.stringify: 
-                    //https://www.dropboxforum.com/t5/Dropbox-API-Support-Feedback/quot-Dropbox-API-Arg-quot-could-not-decode-input-as-JSON/td-p/288054
-                    'Dropbox-API-Arg': JSON.stringify({
-                        'path': '/media/test_7.txt',
-                        'mode': 'add',
-                        'autorename': true,
-                        'mute': false,
-                        'strict_conflict': false
-                    })
-                },
-                //this is working:
-                //data:  '@/files/test_2.txt'//filepath from where you are uploading.
-                
-                //testing: 
-                data: data.data //this variable needs to wait for req.on('data')
-            })
-            res.send(response.data);
-
-        }
-            
-        }
-        
-        catch(error) {
-            // handle if you got an error
-            res.send(error.response.data);
-        }
         
     })
 
