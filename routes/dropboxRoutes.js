@@ -66,85 +66,246 @@ module.exports = app => {
     })
 
 
-
-    //upload file < 150MB
+    //5/14 the function pattern i might need is in example url below:
     //https://stackoverflow.com/questions/40114056/how-to-use-dropbox-upload-session-for-files-larger-than-150mb
     app.post('/api/upload/:file/:size', (req, res, next) => {
 
         
-        //if((req.params.size * .000001) > 150)
-        
-        //1MB = 0.000001 bytes. size is in bytes. so take "size" and multiply by .000001.
+
         
         //req.on listens for streamed data from client and pushes it all into "data" variable
         //req.on help tutorials: https://spin.atomicobject.com/2015/10/03/remote-pfs-node-js-express/
         
         let number = 0;
-        let sessionIDs = [];
-        req.on('data', async chunk => {
-            //need to wait for response to finish before sending data... we might need multer for real now...
-            //or build array of session ids?
-            try {
-                const iterator = () => {
-                    number = number + 1;
-                    console.log(number);
-                }
-                iterator();
-                
-                const getAxiosConfig = () => {
-                    if(number === 1) {
-                        return {
-                            url: 'https://content.dropboxapi.com/2/files/upload_session/start',
-                            headers: {
-                                'Content-Type': 'application/octet-stream',
-                                'Authorization': `Bearer ${dropboxAccessToken}`,
-                                //JSON.stringify needed because dropbox api requires "Dropbox-API-Arg" value to be JSON.
-                                //ref for json.stringify: https://www.dropboxforum.com/t5/Dropbox-API-Support-Feedback/quot-Dropbox-API-Arg-quot-could-not-decode-input-as-JSON/td-p/288054
-                                'Dropbox-API-Arg': JSON.stringify({
-                                    'close': false
-                                })
-                            }
-                        }
-                    } else if(number > 1) {
-                        return {
-                            url: 'https://content.dropboxapi.com/2/files/upload_session/append_v2',
-                            headers: {
-                                'Content-Type': 'application/octet-stream',
-                                'Authorization': `Bearer ${dropboxAccessToken}`,
-                                //JSON.stringify needed because dropbox api requires "Dropbox-API-Arg" value to be JSON.
-                                //ref for json.stringify: https://www.dropboxforum.com/t5/Dropbox-API-Support-Feedback/quot-Dropbox-API-Arg-quot-could-not-decode-input-as-JSON/td-p/288054
-                                DropboxAPIArg: JSON.stringify({
-                                    'cursor': {
-                                        'session_id': sessionIDs[(number - 1)],
-                                        'offset': 0
-                                    },
-                                    'close': false
-                                })
-                            }
-                        }
+        let sessionID = '';
+
+        const fileSize = req.params.size;
+        let byteCount = 0; //use for dropbox "offset" value
+        const chunkSize = 100000;
+        const maxBytes = 10000000000; //10GBs
+        let response = {};
+
+        const getResponse = async (url, headers, chunks, sessionId, offset, finalChunk, callback) => {
+            const response = await axios({
+                method: 'POST',
+                url: url,
+                headers: headers,
+                data: Buffer.concat(chunks)
+            })
+            console.log(response.data);
+            if(finalChunk) {res.send(response.data)};
+            return response.data; //this should be session_id object if session upload url is used.
+            
+            //return response.data;
+            //can not use res.send functions... will lead to multiple header error... res.send(response.data);
+        }
+        
+        //small files under 100kb
+        if(fileSize < chunkSize) {
+            const url = 'https://content.dropboxapi.com/2/files/upload';
+            const headers = {
+                'Content-Type': 'application/octet-stream',
+                'Authorization': `Bearer ${dropboxAccessToken}`,
+                //JSON.stringify needed because dropbox api requires "Dropbox-API-Arg" value to be JSON.
+                //ref for json.stringify: https://www.dropboxforum.com/t5/Dropbox-API-Support-Feedback/quot-Dropbox-API-Arg-quot-could-not-decode-input-as-JSON/td-p/288054
+                'Dropbox-API-Arg': JSON.stringify({
+                    'path': `/media/${req.params.file}`,
+                    'mode': 'add',
+                    'autorename': true,
+                    'mute': false,
+                    'strict_conflict': false
+                })
+            }
+
+            let chunks = [];
+            let finalChunk = false;
+            req.on('readable', function () {
+                let data;
+                while(true) {
+                    data = this.read(chunkSize);
+                    if (!data) { break; }
+    
+                    byteCount += data.byteLength;
+                    if (byteCount > maxBytes) {
+                        console.log("error, upload exceededs 10GBs.")
+                    break;
+                    }
+
+                    chunks.push(data);
+                    if(data.byteLength < chunkSize) {
+                        console.log("this is last chunk");
+                        finalChunk = true;
                     }
                 }
-                console.log(getAxiosConfig().url);
-                console.log(getAxiosConfig().DropboxAPIArg);
+                getResponse(url, headers, chunks, null, null, finalChunk);
+            });
+
+            req.on('end', () => {
+                console.log("done accepting data");
+            })
+        }
+        
+        
+        else {
+            
+            const headers = {};
+            let offset = 0;
+            let chunks = [];
+            let finalChunk = false;
+
+            const getUrl = () => {
+                //session start
+                if(offset === 0) {
+                    return 'https://content.dropboxapi.com/2/files/upload_session/start';
+                } 
+                //append session
+                else if(offset !== 0 && finalChunk === false) {
+                    return 'https://content.dropboxapi.com/2/files/upload_session/append_v2';
+                }
+                //finish session
+                else if(offset !== 0 && finalChunk === true) {
+                    return 'https://content.dropboxapi.com/2/files/upload_session/finish'
+                } 
+            };
+
+            req.on('readable', function () {
+                let data;
                 
-                const response = await axios({
-                    method: 'POST',
-                    url: getAxiosConfig().url,
-                    headers: getAxiosConfig.headers,
-                    //data:  '@/files/test_2.txt'//this is working for local file. filepath from where you are uploading. 
-                    data: chunk
-                })
-                //console.log(response.data.session_id);
-                sessionIDs.push(response.data.session_id);
+                while(true) {
+                    data = this.read(chunkSize);
+                    if (!data) { break; }
+    
+                    byteCount += data.byteLength;
+                    offset = byteCount;
+
+                    if (byteCount > maxBytes) {
+                        console.log('error, upload exceededs 10GBs.')
+                    break;
+                    }
+
+                    chunks.push(data);
+                    if(data.byteLength < chunkSize) {
+                        console.log('this is last chunk');
+                        finalChunk = true;
+                    }
+                }
+                
+                getResponse(url, headers, chunks, null, null, finalChunk);
+                
+            });
+
+            req.on('end', () => {
+                console.log('done accepting data');
+            })
+        }
+        
+        
+
+        /*
+        req.on('readable', function () {
+            let chunks = [];
+            let data;
+            
+            while(true) {
+                data = this.read(chunkSize);
+                if (!data) { break; }
+
+                byteCount += data.byteLength;
+                if (byteCount > maxBytes) {
+                    console.log("error, upload exceededs 10GBs.")
+                break;
+                }
+                
+                chunks.push(data);
+                console.log(byteCount);
+                if(data.byteLength < chunkSize) {
+                    console.log("call the finished function after push final chunk.");
+                }
+            }
+            
+            
+
+            //if byteCount <= 100000, url_start //does not solve problem for small files.
+            //if data.byteLength < chunkSize, url_finished
+            //else url_prepend
+
+        // do something with chunks like the axios call?
+
+        });
+        */
+
+
+
+
+        /*
+        req.on('data', chunk => {
+            
+            try {
+                const iterator = () => number = number + 1;
+                iterator();
+
+                let url = '';
+                let headers = {}
+                let offset = 0;
+
+                if(number === 1) {
+                    url = 'https://content.dropboxapi.com/2/files/upload_session/start';
+                    headers = {
+                        'Content-Type': 'application/octet-stream',
+                        'Authorization': `Bearer ${dropboxAccessToken}`,
+                        'Dropbox-API-Arg': JSON.stringify({'close': false})
+                    };
+                } 
+                else if(number > 1) {
+                    url = '';
+                    headers = {
+                        'Content-Type': 'application/octet-stream',
+                        'Authorization': `Bearer ${dropboxAccessToken}`,
+                        'Dropbox-API-Arg': JSON.stringify({
+                            'cursor': {
+                                'session_id': sessionIDs['session_id'],
+                                'offset': offset //this is how much data has been sent so far
+                            },
+                            'close': false
+                        })
+                    };
+                    
+                }
+                console.log(url);
+                console.log(headers);
+                getAxiosResponse(chunk, url, headers);
+
+                const getAxiosResponse = async (dataChunk, url, headers) => {
+                    try {
+                        const response = await axios({
+                        method: 'POST',
+                        url: url,
+                        headers: headers,
+                        //data:  '@/files/test_2.txt'//this is working for local file. filepath from where you are uploading. 
+                        data: dataChunk
+                        })
+                        console.log(response.data);
+                        sessionIDs.push(response);
+                    }
+                    catch(error) {
+                        res.send(error);
+                    }
+                }
+                //need callback from getAxiosResponse to resolve?
                 
             }
             catch(error) {
                 res.send(error);
             }
+            
         });
+        */
+        /*
         req.on('end', () => {
             console.log("all data has been passed to axios");
+            console.log(byteCount);
         })
+        */
         
     })
 

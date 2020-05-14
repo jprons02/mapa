@@ -1,0 +1,4 @@
+upload bug -
+how to recreate:
+    -select a file and do not click upload
+    -go to select a file again, hit cancel
