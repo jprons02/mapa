@@ -86,16 +86,21 @@ module.exports = app => {
         let response = {};
 
         const getResponse = async (url, headers, chunks, sessionId, offset, finalChunk, callback) => {
-            const response = await axios({
-                method: 'POST',
-                url: url,
-                headers: headers,
-                data: Buffer.concat(chunks)
-            })
-            console.log(response.data);
-            if(finalChunk) {res.send(response.data)};
-            return response.data; //this should be session_id object if session upload url is used.
-            
+            try{
+                console.log('getResponse() fired.');
+                const response = await axios({
+                    method: 'POST',
+                    url: url,
+                    headers: headers,
+                    data: Buffer.concat(chunks)
+                })
+                console.log(response.data.session_id);
+                if(finalChunk) {res.send(response.data)};
+                return response.data.session_id; //this should be session_id object if session upload url is used.
+            }
+            catch(error) {
+                console.log(error.response.data);
+            }
             //return response.data;
             //can not use res.send functions... will lead to multiple header error... res.send(response.data);
         }
@@ -138,6 +143,7 @@ module.exports = app => {
                     }
                 }
                 getResponse(url, headers, chunks, null, null, finalChunk);
+                //url, headers, chunks, sessionId, offset, finalChunk, callback
             });
 
             req.on('end', () => {
@@ -148,25 +154,26 @@ module.exports = app => {
         
         else {
             
-            const headers = {};
+            let headers = {};
             let offset = 0;
             let chunks = [];
             let finalChunk = false;
-
-            const getUrl = () => {
+            let url = '';
+            let sessionId = null;
+            const sessionFlag = () => {
                 //session start
                 if(offset === 0) {
-                    return 'https://content.dropboxapi.com/2/files/upload_session/start';
+                    return 'start';
                 } 
                 //append session
                 else if(offset !== 0 && finalChunk === false) {
-                    return 'https://content.dropboxapi.com/2/files/upload_session/append_v2';
+                    return 'append';
                 }
                 //finish session
                 else if(offset !== 0 && finalChunk === true) {
-                    return 'https://content.dropboxapi.com/2/files/upload_session/finish'
+                    return 'finish'
                 } 
-            };
+            }
 
             req.on('readable', function () {
                 let data;
@@ -189,9 +196,60 @@ module.exports = app => {
                         finalChunk = true;
                     }
                 }
-                
-                getResponse(url, headers, chunks, null, null, finalChunk);
-                
+
+                if(sessionFlag() === 'start') {
+                    console.log('session start flag');
+                    console.log('offset number: ' + offset);
+                    url = 'https://content.dropboxapi.com/2/files/upload_session/start';
+                    headers = {
+                        'Content-Type': 'application/octet-stream',
+                        'Authorization': `Bearer ${dropboxAccessToken}`,
+                        'Dropbox-API-Arg': JSON.stringify({'close': false})
+                    };
+                    sessionId = getResponse(url, headers, chunks, sessionId, offset, finalChunk);
+                    
+                } 
+                else if(sessionFlag() === 'append') {
+                    console.log('session append flag');
+                    console.log('offset number: ' + offset);
+                    url = 'https://content.dropboxapi.com/2/files/upload_session/append_v2';
+                    headers = {
+                        'Content-Type': 'application/octet-stream',
+                        'Authorization': `Bearer ${dropboxAccessToken}`,
+                        'Dropbox-API-Arg': JSON.stringify({
+                            'cursor': {
+                                'session_id': sessionId,
+                                'offset': offset //this is how much data has been sent so far
+                            },
+                            'close': false
+                        })
+                    };
+                    sessionId = getResponse(url, headers, chunks, sessionId, offset, finalChunk);
+                }
+                else if(sessionFlag() === 'finish') {
+                    console.log('session finish flag');
+                    console.log('offset number: ' + offset);
+                    url = 'https://content.dropboxapi.com/2/files/upload_session/finish';
+                    headers = {
+                        'Content-Type': 'application/octet-stream',
+                        'Authorization': `Bearer ${dropboxAccessToken}`,
+                        'Dropbox-API-Arg': JSON.stringify({
+                            'cursor': {
+                                'session_id': sessionId,
+                                'offset': offset //this is how much data has been sent so far
+                            },
+                            'commit': { 
+                                'path': `/media/${req.params.file}`,
+                                'mode': 'add',
+                                'autorename': true,
+                                'mute': false,
+                                'strict_conflict': false
+                            }
+                        })
+                    };
+                    sessionId = getResponse(url, headers, chunks, sessionId, offset, finalChunk);
+                }
+
             });
 
             req.on('end', () => {
