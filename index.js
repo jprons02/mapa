@@ -14,7 +14,6 @@ const addUserRoute = require('./routes/addUser');
 const loginRoute = require('./routes/login');
 const googleOAuthRoute = require('./routes/googleAuthRoutes');
 const dropboxRoutes = require('./routes/dropboxRoutes');
-const dropboxRoutes2 = require('./routes/dropboxRoutes2');
 
 
 mongoose.connect(keys.mongoURI, {
@@ -46,7 +45,6 @@ addUserRoute(app);
 loginRoute(app);
 googleOAuthRoute(app);
 dropboxRoutes(app);
-dropboxRoutes2(app);
 
 
 app.use('/admin/tools/testing', (req, res) => {
