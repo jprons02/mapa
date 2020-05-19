@@ -1,9 +1,31 @@
 const axios = require('axios');
 const {dropboxAccessToken} = require('../../config/dev');
+const {dropboxKey} = require('../../config/dev');
+const {dropboxSecret} = require('../../config/dev');
 const fs = require('fs');
 const multer = require('multer');
 const upload = multer({dest: 'temp_files_to_upload'});
+//https://github.com/adasq/dropbox-v2-api
+const dropboxV2Api = require('dropbox-v2-api');
 
+// create session ref:
+const dropbox = dropboxV2Api.authenticate({
+    token: 'your token'
+});
+
+// use session ref to call API, i.e.:
+//set credentials
+const dropbox = dropboxV2Api.authenticate({
+    client_id: 'APP_KEY',
+    client_secret: 'APP_SECRET',
+    redirect_uri: 'REDIRECT_URI'
+});
+//generate and visit authorization sevice 
+const authUrl = dropbox.generateAuthUrl();
+//after redirection, you should receive code
+dropbox.getToken(code, (err, result, response) => {
+    //you are authorized now!
+});
 
 //100% have to use multer... the functions that were listening for data were firing before axios calls could resolve.
 //-accept data in formData type format from frontend 
@@ -65,172 +87,78 @@ module.exports = app => {
             console.log('done.');
         }
 
-        /*
-        sessionStart((sessionId) => {
-            sessionAppend(sessionId, () => {
-                sessionFinish(sessionId);
-            });
-        });
-        */
-
 
         const getResponseFromBigFile = () => {
-            console.log('big file function fired...');
             const readStream = fs.createReadStream(`temp_files_to_upload/${req.file.filename}`);
-            let chunkPosition = 0;
-            let sessionId = '';
 
-            const sessionStart = async (chunk) => {
-                console.log('sessionStart function fired...');
-                const url = 'https://content.dropboxapi.com/2/files/upload_session/start';
-                try {
-                    const response = await axios({
-                        method: 'POST',
-                        url: url,
-                        headers: {
-                            'Content-Type': 'application/octet-stream',
-                            'Authorization': `Bearer ${dropboxAccessToken}`,
-                            'Dropbox-API-Arg': JSON.stringify({
-                                'close': false
-                            })
-                        },
-                        data: chunk
-                    })
-                    sessionId = response.data.session_id
-                    console.log(response.data);
-                }
-                catch(error) {
-                    res.send(error);
-                }
-            }
+            //https://stackoverflow.com/questions/40114056/how-to-use-dropbox-upload-session-for-files-larger-than-150mb
+            const CHUNK_LENGTH = 100;
+            //create read streams, which generates set of 100 (CHUNK_LENGTH) characters of values: 1 and 2
+            const firstUploadChunkStream = () => readStream('1', CHUNK_LENGTH); 
+            const secondUploadChunkStream = () => readStream('2', CHUNK_LENGTH);
 
-            const sessionAppend = async (chunk, sessionId) => {
-                console.log('sessionAppend function fired...');
-                const url = 'https://content.dropboxapi.com/2/files/upload_session/append_v2';
-                try { 
-                    const response = await axios({
-                        method: 'POST',
-                        url: url,
-                        headers: {
-                            'Content-Type': 'application/octet-stream',
-                            'Authorization': `Bearer ${dropboxAccessToken}`,
-                            'Dropbox-API-Arg': JSON.stringify({
-                                'cursor': {
-                                    'session_id': sessionId,
-                                    'offset': chunk.length
-                                },
-                                'close': false
-                            })
-                        },
-                        data: chunk
-                    })
-                    sessionId = response.data.session_id
-                }
-                catch(error) {
-                    res.send(error);
-                }
-            }
-
-            const sessionFinish = async (chunk, sessionId) => {
-                console.log('sessionFinish function fired...');
-                const url = 'https://content.dropboxapi.com/2/files/upload_session/finish';
-                try {
-                    const response = await axios({
-                        method: 'POST',
-                        url: url,
-                        headers: {
-                            'Content-Type': 'application/octet-stream',
-                            'Authorization': `Bearer ${dropboxAccessToken}`,
-                            'Dropbox-API-Arg': JSON.stringify({
-                                'cursor': {
-                                    'session_id': sessionId,
-                                    'offset': chunk.length
-                                },
-                                'commit': {
-                                    'path': `/media/${req.file.originalname}`,
-                                    'mode': 'add',
-                                    'autorename': true,
-                                    'mute': false,
-                                    'strict_conflict': false
-                                }
-                            })
-                        },
-                        data: chunk
-                    })
-                res.send(response.data);
-                deleteTempFile(response.data);
-                console.log('done.');
-                }
-                catch(error) {
-                    res.send(error);
-                }
-                
-            }
-
-            readStream.on('readable', () => {
-                let maxChunkSize = 65536; //default chunk size i found from console log.
-                let chunk;
-                while (null !== (chunk = readStream.read())) {
-                    console.log(`Received ${chunk.length} bytes of data.`);
-                    console.log(sessionId);
-                    chunkPosition++;
-
-                    if(chunkPosition === 1) {
-                        console.log('use session start');
-                        sessionStart(chunk);
-                    }
-                    else if(chunkPosition === 2) {
-                        console.log('use session append with session start response value');
-                        sessionAppend(chunk, sessionId);
-                    }
-                    else if(chunkPosition >= 3 && chunk.length === maxChunkSize) {
-                        console.log('use session append with session append response value');
-                        sessionAppend(chunk, sessionId);
-                    }
-                    else if(chunkPosition >= 3 && chunk.length < maxChunkSize) {
-                        console.log('use session finish with session append response value');
-                        sessionFinish(chunk, sessionId);
-                    }
-                    else {
-                        console.log('unexpected occured. check logic in readStream while loop.');
-                    }
-                }
+            sessionStart((sessionId) => {
+                sessionAppend(sessionId, () => {
+                    sessionFinish(sessionId);
+                });
             });
 
-            
+            function sessionStart(cb) {
+                dropbox({
+                    resource: 'files/upload_session/start',
+                    parameters: {
+                        close: false
+                    },
+                    readStream: firstUploadChunkStream()
+                }, (err, response) => {
+                    if (err) { return console.log('sessionStart error: ', err) }
+                    console.log('sessionStart response:', response);
+                    cb(response.session_id);
+                });
+            }
+
+
+            function sessionAppend(sessionId, cb) {
+                dropbox({
+                    resource: 'files/upload_session/append_v2',
+                    parameters: {
+                        cursor: {
+                            session_id: sessionId,
+                            offset: CHUNK_LENGTH
+                        },
+                        close: false,
+                    },
+                    readStream: secondUploadChunkStream()
+                }, (err, response) => {
+                    if(err){ return console.log('sessionAppend error: ', err) }
+                    console.log('sessionAppend response:', response);
+                    cb();
+                });
+            }
+
+            function sessionFinish(sessionId) {
+                dropbox({
+                    resource: 'files/upload_session/finish',
+                    parameters: {
+                        cursor: {
+                            session_id: sessionId,
+                            offset: CHUNK_LENGTH * 2
+                        },
+                        commit: {
+                            path: `/media/${req.file.originalname}`,
+                            mode: 'add',
+                            autorename: true,
+                            mute: false
+                        }
+                    }
+                }, (err, response) => {
+                    if (err) { return console.log('sessionFinish error: ', err) }
+                    console.log('sessionFinish response:', response);
+                });
+            }
+
+
         }
-
-
-        //testing chunk sizes and how to access chunk. needed for offset param for dropbox session append  
-        const testing = () => {
-            const readStream = fs.createReadStream(`temp_files_to_upload/${req.file.filename}`);
-            let chunkPosition = 0;
-                
-            readStream.on('readable', () => {
-                let maxChunkSize = 65536; //default chunk size i found from console log.
-                let chunk;
-                while (null !== (chunk = readStream.read())) {
-                    console.log(`Received ${chunk.length} bytes of data.`);
-                    chunkPosition++;
-                    if(chunkPosition === 1) {
-                        console.log('use session start');
-                    }
-                    else if(chunkPosition === 2) {
-                        console.log('use session append with session start response value');
-                    }
-                    else if(chunkPosition >= 3 && chunk.length === maxChunkSize) {
-                        console.log('use session append with session append response value');
-                    }
-                    else if(chunkPosition >= 3 && chunk.length < maxChunkSize) {
-                        console.log('use session finish with session append response value');
-                    }
-                    else {
-                        console.log('unexpected occured. check logic in readStream while loop.');
-                    }
-                }
-            });
-        }
-
 
 
         try {
