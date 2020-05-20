@@ -5,29 +5,14 @@ const {dropboxSecret} = require('../../config/dev');
 const fs = require('fs');
 const multer = require('multer');
 const upload = multer({dest: 'temp_files_to_upload'});
-const stream = require('stream');
 
 const util = require('util');
-//https://github.com/adasq/dropbox-v2-api
 const dropbox = require('dropbox-v2-api').authenticate({ token: dropboxAccessToken });
-
-
-
-//100% have to use multer... the functions that were listening for data were firing before axios calls could resolve.
-//-accept data in formData type format from frontend 
-//-then store in file path in backend
-//-then send to dropbox from filepath
-
-//readable stream docs: https://nodejs.org/api/stream.html#stream_readable_streams
-
 
 module.exports = app => {
 
     app.post('/api/testupload/:file/:size', upload.single('myFile'), (req, res) => {
         console.log('begin upload process...');
-
-        //deletes the file uploaded to temp - called after successful upload to dropbox
-        //https://stackoverflow.com/questions/5315138/node-js-remove-file
         const deleteTempFile = (response) => {
             if(response) {
                 console.log('file has been successfully uploaded to dropbox...');
@@ -44,55 +29,11 @@ module.exports = app => {
         }
 
 
-        //get response for under 150MB
-        const getResponse = async () => {
-            const readStream = fs.createReadStream(`temp_files_to_upload/${req.file.filename}`);
-            const url = 'https://content.dropboxapi.com/2/files/upload';
-            const response = await axios({
-                method: 'POST',
-                url: url,
-                headers: {
-                    'Content-Type': 'application/octet-stream',
-                    'Authorization': `Bearer ${dropboxAccessToken}`,
-                    'Dropbox-API-Arg': JSON.stringify({
-                        'path': `/media/${req.file.originalname}`,
-                        'mode': 'add',
-                        'autorename': true,
-                        'mute': false,
-                        'strict_conflict': false
-                    })
-                },
-                //max bodylength limit error solved: https://stackoverflow.com/questions/56868023/error-request-body-larger-than-maxbodylength-limit-when-sending-base64-post-req/56868296
-                'maxContentLength': Infinity,
-                'maxBodyLength': Infinity,
-                
-                data: readStream
-            })
-            res.send(response.data);
-            deleteTempFile(response.data);
-            console.log('done.');
-        }
-
-
         const getResponseFromBigFile = () => {
-            const readStream = fs.createReadStream(`temp_files_to_upload/${req.file.filename}`);
-            //https://github.com/adasq/dropbox-v2-api/blob/58f938d66adaed3a730d99336576eaa09427f264/src/utils.js#L7
-            /*
-            function createMockedReadStream(sign, length){
-                return tester.createRandomStream(function () {
-                    return sign;
-                }, length);
-            }
-            */
-
-            //https://stackoverflow.com/questions/40114056/how-to-use-dropbox-upload-session-for-files-larger-than-150mb
             const CHUNK_LENGTH = 100;
-            //create read streams, which generates set of 100 (CHUNK_LENGTH) characters of values: 1 and 2
-            //const firstUploadChunkStream = () => utils.createMockedReadStream('1', CHUNK_LENGTH); 
-            //const secondUploadChunkStream = () => utils.createMockedReadStream('2', CHUNK_LENGTH);
             
-            const firstUploadChunkStream = () => readStream.read(CHUNK_LENGTH);
-            const secondUploadChunkStream = () => readStream.read(CHUNK_LENGTH);
+            const firstUploadChunkStream = () => fs.createReadStream(`temp_files_to_upload/${req.file.filename}`, {'1': CHUNK_LENGTH});
+            const secondUploadChunkStream = () => fs.createReadStream(`temp_files_to_upload/${req.file.filename}`, {'2': CHUNK_LENGTH});
 
             sessionStart((sessionId) => {
                 sessionAppend(sessionId, () => {
@@ -170,22 +111,10 @@ module.exports = app => {
                 if(err) {
                     console.log('file has not been uploaded.');
                 }
-                //file exists, do axios call to dropbox
+                //file exists, do dropbox call
                 else {
                     console.log('file has been uploaded to node server...');
                     getResponseFromBigFile();
-                    //if file is less than 150MB
-                    /*
-                    if((req.params.size * .000001) < 150)  {
-                        console.log('file is less than 150MB...');
-                        getResponse();
-                    } 
-                    else {
-                        console.log('file is greater or equal to 150MB...');
-                        //https://stackoverflow.com/questions/40114056/how-to-use-dropbox-upload-session-for-files-larger-than-150mb
-                        getResponseFromBigFile();
-                    }
-                    */
                 }
             });
             
