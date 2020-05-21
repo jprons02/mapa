@@ -7,9 +7,11 @@ const multer = require('multer');
 const upload = multer({dest: 'temp_files_to_upload'});
 const stream = require('stream');
 
-const util = require('util');
 //https://github.com/adasq/dropbox-v2-api
 const dropbox = require('dropbox-v2-api').authenticate({ token: dropboxAccessToken });
+
+const Stream = require('stream');
+
 
 
 
@@ -75,24 +77,23 @@ module.exports = app => {
 
 
         const getResponseFromBigFile = () => {
-            const readStream = fs.createReadStream(`temp_files_to_upload/${req.file.filename}`);
-            //https://github.com/adasq/dropbox-v2-api/blob/58f938d66adaed3a730d99336576eaa09427f264/src/utils.js#L7
-            /*
+
+            //const readStream = fs.createReadStream(`temp_files_to_upload/${req.file.filename}`);
+            const readableStream = new Stream.Readable();
+            readableStream.push(fs.createReadStream(`temp_files_to_upload/${req.file.filename}`));
+
             function createMockedReadStream(sign, length){
-                return tester.createRandomStream(function () {
+                return readStream.createRandomStream(function () {
                     return sign;
                 }, length);
             }
-            */
 
             //https://stackoverflow.com/questions/40114056/how-to-use-dropbox-upload-session-for-files-larger-than-150mb
             const CHUNK_LENGTH = 100;
             //create read streams, which generates set of 100 (CHUNK_LENGTH) characters of values: 1 and 2
-            //const firstUploadChunkStream = () => utils.createMockedReadStream('1', CHUNK_LENGTH); 
-            //const secondUploadChunkStream = () => utils.createMockedReadStream('2', CHUNK_LENGTH);
+            const firstUploadChunkStream = () => createMockedReadStream('1', CHUNK_LENGTH); 
+            const secondUploadChunkStream = () => createMockedReadStream('2', CHUNK_LENGTH);
             
-            const firstUploadChunkStream = () => readStream.read(CHUNK_LENGTH);
-            const secondUploadChunkStream = () => readStream.read(CHUNK_LENGTH);
 
             sessionStart((sessionId) => {
                 sessionAppend(sessionId, () => {
