@@ -88,21 +88,9 @@ module.exports = app => {
             const firstUploadChunkStream = () => fs.createReadStream(`temp_files_to_upload/${req.file.filename}`, { start: 0, end: CHUNK_LENGTH - 1  }); // first 100 bytes (0 - 99)
             const secondUploadChunkStream = () => fs.createReadStream(`temp_files_to_upload/${req.file.filename}`, { start: iterator * CHUNK_LENGTH, end: (iterator + 1) * CHUNK_LENGTH - 1 }); //second 100 bytes (100 - 200)
 
-            /*
             sessionStart((sessionId) => {
                 sessionAppend(sessionId, () => {
                     sessionFinish(sessionId);
-                });
-            });
-            */
-            sessionStart((sessionId) => {
-                sessionAppend(sessionId, () => {
-                    if((iterator + 1) * CHUNK_LENGTH - 1 < req.params.size) {
-                        iterator = iterator + 1;
-                        sessionStart(sessionId);    
-                    } else {
-                        sessionFinish(sessionId);
-                    }
                 });
             });
 
@@ -136,7 +124,14 @@ module.exports = app => {
                 }, (err, result, response) => {
                     if(err){ return console.log('sessionAppend error: ', err) }
                     console.log('sessionAppend result:', result);
-                    cb();
+                    //if req.params.size and iterator logic then increase iterator and do sessionstart again.
+                    if((iterator + 1) * CHUNK_LENGTH - 1 < req.params.size) {
+                        iterator = iterator + 1;
+                        sessionStart(sessionId);    
+                    } 
+                    else {
+                        cb();
+                    }
                 });
             }
 
