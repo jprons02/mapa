@@ -16,7 +16,7 @@ module.exports = app => {
             let sessionId = '';
             let iteration = 0;
             const FILE_SIZE = parseInt(req.params.size);
-            const CHUNK_LENGTH = 100000;
+            const CHUNK_LENGTH = 50000;
             let bytesConsumed = 0;
             
             const sessionStart = async (chunk) => {
@@ -34,6 +34,8 @@ module.exports = app => {
                                 'close': false
                             })
                         },
+                        'maxContentLength': Infinity,
+                        'maxBodyLength': Infinity,
                         data: chunk
                     })
                     sessionId = response.data.session_id;
@@ -44,8 +46,10 @@ module.exports = app => {
                     console.log(bytesConsumed);
                 }
                 catch(error) {
-                    console.log(error.response.data);
+                    console.log(error);
                 }
+                
+                
                 
             }
 
@@ -67,17 +71,17 @@ module.exports = app => {
                                 'close': false
                             })
                         },
+                        'maxContentLength': Infinity,
+                        'maxBodyLength': Infinity,
                         data: chunk
                     })
-                    sessionId = response.data.session_id;
-                    console.log(sessionId);
                     iteration = iteration + 1;
                     console.log(iteration);
                     bytesConsumed = (bytesConsumed + CHUNK_LENGTH) >= FILE_SIZE ? FILE_SIZE - bytesConsumed : iteration * CHUNK_LENGTH;
                     console.log(bytesConsumed);
                 }
                 catch(error) {
-                    console.log(error.response.data);
+                    console.log(error);
                 }
             }
 
@@ -105,6 +109,8 @@ module.exports = app => {
                                 }
                             })
                         },
+                        'maxContentLength': Infinity,
+                        'maxBodyLength': Infinity,
                         data: chunk
                     })
                 res.send(response.data);
@@ -121,21 +127,27 @@ module.exports = app => {
 
             const uploadChunkStream = () => fs.createReadStream(`temp_files_to_upload/${req.file.filename}`, {
                     start: iteration * CHUNK_LENGTH,
-                    end: CHUNK_LENGTH >= (FILE_SIZE - bytesConsumed) ? FILE_SIZE - bytesConsumed : bytesConsumed * iteration + CHUNK_LENGTH - 1
+                    //if end chunk is greater than the data that is left... end = total file size - amount of data consumed
+                    //else, end = bytes consumed so far * iteration + standard chunk - 1
+                    end: CHUNK_LENGTH >= (FILE_SIZE - bytesConsumed) ? FILE_SIZE : bytesConsumed * iteration + CHUNK_LENGTH - 1
                 }   
             );
             
             const dowork = async () => {
+                console.log('dowork() fired.');
                 await sessionStart(uploadChunkStream(), sessionId);
                 console.log('dowork() sessionStart was called');
-                while(bytesConsumed < FILE_SIZE) {
-                    await sessionAppend(uploadChunkStream(), sessionId)
-                    console.log('dowork() sessionAppend was called');
+                await sessionAppend(uploadChunkStream(), sessionId)
+                if(bytesConsumed < FILE_SIZE) {
+                    dowork();
+                } 
+                else {
+                    await sessionFinish(uploadChunkStream(), sessionId);
+                    console.log('dowork() sessionFinish was called');
                 }
-                await sessionFinish(uploadChunkStream(), sessionId);
-                console.log('dowork() sessionFinish was called');
             }
             dowork();
+            //while(bytesConsumed < FILE_SIZE)
 
         }
 
