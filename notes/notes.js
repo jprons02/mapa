@@ -31,9 +31,9 @@ module.exports = app => {
 
         const getResponseFromBigFile = () => {
             const CHUNK_LENGTH = 100;
-            
-            const firstUploadChunkStream = () => fs.createReadStream(`temp_files_to_upload/${req.file.filename}`, {'1': CHUNK_LENGTH});
-            const secondUploadChunkStream = () => fs.createReadStream(`temp_files_to_upload/${req.file.filename}`, {'2': CHUNK_LENGTH});
+
+            const firstUploadChunkStream = () => fs.createReadStream(`temp_files_to_upload/${req.file.filename}`, { start: 0, end: CHUNK_LENGTH - 1  }); // first 100 bytes (0 - 99)
+            const secondUploadChunkStream = () => fs.createReadStream(`temp_files_to_upload/${req.file.filename}`, { start: CHUNK_LENGTH, end: 2 * CHUNK_LENGTH - 1 }); //second 100 bytes (100 - 200)
 
             sessionStart((sessionId) => {
                 sessionAppend(sessionId, () => {
@@ -42,7 +42,6 @@ module.exports = app => {
             });
 
             function sessionStart(cb) {
-                console.log('session start fired...');
                 dropbox({
                     resource: 'files/upload_session/start',
                     parameters: {
@@ -58,7 +57,6 @@ module.exports = app => {
 
 
             function sessionAppend(sessionId, cb) {
-                console.log('session append fired...');
                 dropbox({
                     resource: 'files/upload_session/append',
                     parameters: {
@@ -77,7 +75,6 @@ module.exports = app => {
             }
 
             function sessionFinish(sessionId) {
-                console.log('session finish fired...');
                 dropbox({
                     resource: 'files/upload_session/finish',
                     parameters: {
@@ -86,8 +83,8 @@ module.exports = app => {
                             offset: CHUNK_LENGTH * 2
                         },
                         commit: {
-                            path: `/media/${req.file.originalname}`,
-                            mode: 'add',
+                            path: "/result.txt",
+                            mode: "add",
                             autorename: true,
                             mute: false
                         }
@@ -95,8 +92,8 @@ module.exports = app => {
                 }, (err, result, response) => {
                     if (err) { return console.log('sessionFinish error: ', err) }
                     console.log('sessionFinish result:', result);
-                    res.send(result);
                 });
+                res.send(result);
             }
 
 
@@ -117,10 +114,12 @@ module.exports = app => {
                     getResponseFromBigFile();
                 }
             });
+            res.send('nice');
+            
             
         }
         catch(error) {
-          res.send(error);
+            res.send(error);
         }
 
     });
