@@ -19,7 +19,7 @@ class Upload extends React.Component {
             }
             */
 
-            const url = `/api/testupload2/${this.props.selectedFile.name}/${this.props.selectedFile.size}`;
+            const url = `/api/testupload/${this.props.selectedFile.name}/${this.props.selectedFile.size}`;
             
 
             const response = await axios({

@@ -5,13 +5,15 @@ const multer = require('multer');
 const upload = multer({dest: 'temp_files_to_upload'});
 
 //https://github.com/adasq/dropbox-v2-api
+/*
 const dropboxV2Api = require('dropbox-v2-api');
 const path = require('path');
 const credentials = JSON.parse(fs.readFileSync(path.join(__dirname, 'credentials.json')));
 const dropbox = dropboxV2Api.authenticate({
     token: credentials.TOKEN
 });
-//const dropbox = require('dropbox-v2-api').authenticate({ token: dropboxAccessToken });
+*/
+const dropbox = require('dropbox-v2-api').authenticate({ token: dropboxAccessToken });
 
 
 
@@ -79,70 +81,101 @@ module.exports = app => {
 
 
         const getResponseFromBigFile = () => {
-            const CHUNK_LENGTH = 100;
-            iterator = 1;
+            const CHUNK_LENGTH = 100000;
+            const FILE_SIZE = parseInt(req.params.size);
+            let bytesUploaded = 0;
+            let isClosed = false;
+            
+            const uploadChunkStream = () => {
+                console.log('uploadChunk called');
+                let start;
+                let end;
 
-            //const firstUploadChunkStream = () => fs.createReadStream(`temp_files_to_upload/${req.file.filename}`, { start: 0, end: CHUNK_LENGTH - 1  }); // first 100 bytes (0 - 99)
-            //const secondUploadChunkStream = () => fs.createReadStream(`temp_files_to_upload/${req.file.filename}`, { start: CHUNK_LENGTH, end: 2 * CHUNK_LENGTH - 1 }); //second 100 bytes (100 - 200)
+                //end
+                if((bytesUploaded + CHUNK_LENGTH) >= FILE_SIZE) {
+                    start = bytesUploaded;
+                    end = FILE_SIZE;
+                } 
+                //start or continue upload
+                else {
+                    start = bytesUploaded;
+                    end = bytesUploaded + CHUNK_LENGTH - 1;
+                }
+                
+                console.log('start value: ' + start);
+                console.log('end value: ' + end);
+                
+                return fs.createReadStream(`temp_files_to_upload/${req.file.filename}`, {start: start, end: end});
+            }
 
-            const firstUploadChunkStream = () => fs.createReadStream(`temp_files_to_upload/${req.file.filename}`, { start: 0, end: CHUNK_LENGTH - 1  }); // first 100 bytes (0 - 99)
-            const secondUploadChunkStream = () => fs.createReadStream(`temp_files_to_upload/${req.file.filename}`, { start: iterator * CHUNK_LENGTH, end: (iterator + 1) * CHUNK_LENGTH - 1 }); //second 100 bytes (100 - 200)
-
-            sessionStart((sessionId) => {
-                sessionAppend(sessionId, () => {
-                    sessionFinish(sessionId);
-                });
-            });
+            const dowork = () => {
+                sessionStart((sessionId) => {
+                    if(bytesUploaded + CHUNK_LENGTH >= FILE_SIZE) {
+                        isClosed = true;
+                    }
+                    sessionAppend(sessionId, () => {
+                        if(bytesUploaded + CHUNK_LENGTH >= FILE_SIZE) {
+                            sessionFinish(sessionId);
+                        }
+                        else {
+                            dowork();
+                        }
+                    })
+                })
+            }
+            dowork();
 
             function sessionStart(cb) {
+                console.log('sessionStart() called.');
                 dropbox({
                     resource: 'files/upload_session/start',
                     parameters: {
                         close: false
                     },
-                    readStream: firstUploadChunkStream()
+                    readStream: uploadChunkStream()
                 }, (err, result, response) => {
                     if (err) { return console.log('sessionStart error: ', err) }
                     console.log('sessionStart result:', result);
+                    
+                    bytesUploaded = bytesUploaded + CHUNK_LENGTH;
+                    console.log('bytes uploaded: ' + bytesUploaded);
                     cb(result.session_id);
                 });
             }
-
-
+            
+            
             function sessionAppend(sessionId, cb) {
+                console.log('sessionAppend() called.');
                 dropbox({
                     resource: 'files/upload_session/append',
                     parameters: {
                         cursor: {
                             session_id: sessionId,
-                            //offset: CHUNK_LENGTH
-                            offset: iterator * CHUNK_LENGTH
+                            //offset = UInt64 The amount of data that has been uploaded so far. We use this to make sure upload data isn't lost or duplicated in the event of a network error.
+                            offset: bytesUploaded - 1
                         },
-                        close: false,
+                        close: isClosed,
                     },
-                    readStream: secondUploadChunkStream()
+                    readStream: uploadChunkStream()
                 }, (err, result, response) => {
                     if(err){ return console.log('sessionAppend error: ', err) }
+                    bytesUploaded = bytesUploaded + CHUNK_LENGTH;
                     console.log('sessionAppend result:', result);
-                    //if req.params.size and iterator logic then increase iterator and do sessionstart again.
-                    if((iterator + 1) * CHUNK_LENGTH - 1 < req.params.size) {
-                        iterator = iterator + 1;
-                        sessionStart(sessionId);    
-                    } 
-                    else {
-                        cb();
-                    }
+                    cb();
+                    
                 });
-            }
 
+            }
+            
             function sessionFinish(sessionId) {
+                console.log('sessionFinish() called.');
                 dropbox({
                     resource: 'files/upload_session/finish',
                     parameters: {
                         cursor: {
                             session_id: sessionId,
-                            //offset: CHUNK_LENGTH * 2
-                            offset: req.params.size
+                            offset: bytesUploaded - 1
+                            
                         },
                         commit: {
                             path: `/media/${req.file.originalname}`,
@@ -155,6 +188,7 @@ module.exports = app => {
                     if (err) { return console.log('sessionFinish error: ', err) }
                     console.log('sessionFinish result:', result);
                     res.send(result);
+                    deleteTempFile(result);
                 });
             }
 
