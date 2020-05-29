@@ -243,7 +243,8 @@ module.exports = app => {
                 //file exists, do axios call to dropbox
                 else {
                     console.log('file has been uploaded to node server...');
-                    getResponseFromBigFile();
+                    getResponse();
+                    //getResponseFromBigFile();
                     //if file is less than 150MB
                     /*
                     if((req.params.size * .000001) < 150)  {

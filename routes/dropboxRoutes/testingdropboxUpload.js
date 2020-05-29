@@ -8,10 +8,7 @@ const upload = multer({dest: 'temp_files_to_upload'});
 
 /*
 Observation...
-start value = 364,309
-end value = 374,309
-diference is 10,000
-the uploaded size of the file was 30,000
+problem i think is in the start and end values... 2nd call to start is hanging as if possibly the start or end value is wrong
 */
 
 
@@ -24,6 +21,7 @@ module.exports = app => {
 
             console.log('big file function fired...');
             const CHUNK_LENGTH = 50000; //50kb
+            //const CHUNK_LENGTH = 65536; //default highWaterMark
             //const CHUNK_LENGTH = 50000000; //50MB
             const FILE_SIZE = parseInt(req.params.size);
             let bytesUploaded = 0;
@@ -62,13 +60,16 @@ module.exports = app => {
 
             const sessionStart = async (cb) => {
                 console.log('sessionStart function fired...');
+                const readableStream = fs.createReadStream(`temp_files_to_upload/${req.file.filename}`, {start: 50000, end: 100000});
                 const url = 'https://content.dropboxapi.com/2/files/upload_session/start';
+
                 try { 
                     const response = await axios({
                         method: 'POST',
                         url: url,
                         headers: {
                             'Content-Type': 'application/octet-stream',
+                            'Content-Length': bytesUploaded,
                             'Authorization': `Bearer ${dropboxAccessToken}`,
                             'Dropbox-API-Arg': JSON.stringify({
                                 'close': isClosed
@@ -76,13 +77,13 @@ module.exports = app => {
                         },
                         'maxContentLength': Infinity,
                         'maxBodyLength': Infinity,
-                        data: uploadChunkStream()
+                        data: readableStream
                     })
                     console.log('sessionStart result:', response.data);
                     bytesUploaded = continueCheck() ? bytesUploaded + CHUNK_LENGTH : FILE_SIZE - bytesUploaded;
-                    if(continueCheck()){console.log(end)}
                     console.log('bytes uploaded: ' + bytesUploaded);
                     setStartEnd();
+                    return;
                     cb(response.data.session_id);
                 }
                 catch(error) {
@@ -92,9 +93,9 @@ module.exports = app => {
 
             const sessionAppend = async (sessionId, cb) => {
                 console.log('sessionAppend function fired...');
+                const readableStream = fs.createReadStream(`temp_files_to_upload/${req.file.filename}`, {start: start, end: end});
                 const url = 'https://content.dropboxapi.com/2/files/upload_session/append_v2';
-                console.log('offset logic: ');
-                console.log(isClosed ? FILE_SIZE : bytesUploaded);
+                
                 try { 
                     const response = await axios({
                         method: 'POST',
@@ -106,20 +107,18 @@ module.exports = app => {
                                 'cursor': {
                                     'session_id': sessionId,
                                     //'offset': isClosed ? FILE_SIZE : bytesUploaded
-                                    'offset': CHUNK_LENGTH
-                                    //'offset': bytesUploaded
+                                    //'offset': CHUNK_LENGTH
+                                    'offset': bytesUploaded - CHUNK_LENGTH
                                 },
                                 'close': isClosed
                             })
                         },
                         'maxContentLength': Infinity,
                         'maxBodyLength': Infinity,
-                        data: uploadChunkStream()
+                        data: readableStream
                     })
                     console.log('sessionAppend result:', response.data);
-                    //bytesUploaded = bytesUploaded + CHUNK_LENGTH;
                     bytesUploaded = continueCheck() ? bytesUploaded + CHUNK_LENGTH : end;
-                    if(continueCheck()){console.log(end)}
                     console.log('bytes uploaded: ' + bytesUploaded);
                     setStartEnd();
                     cb();
@@ -130,6 +129,8 @@ module.exports = app => {
             }
 
             const sessionFinish = async (sessionId) => {
+                const readableStream = fs.createReadStream(`temp_files_to_upload/${req.file.filename}`, {start: start, end: end});
+
                 console.log('sessionFinish function fired...');
                 const url = 'https://content.dropboxapi.com/2/files/upload_session/finish';
                 try {
@@ -142,9 +143,7 @@ module.exports = app => {
                             'Dropbox-API-Arg': JSON.stringify({
                                 'cursor': {
                                     'session_id': sessionId,
-                                    //'offset': bytesUploaded
-                                    'offset': 74309
-                                    //'offset': 0
+                                    'offset': FILE_SIZE
                                 },
                                 'commit': {
                                     'path': `/media/${req.file.originalname}`,
@@ -157,7 +156,7 @@ module.exports = app => {
                         },
                         'maxContentLength': Infinity,
                         'maxBodyLength': Infinity,
-                        data: uploadChunkStream()
+                        data: readableStream
                     })
                 console.log('sessionFinish result:', response.data);
                 res.send(response.data);
@@ -166,14 +165,6 @@ module.exports = app => {
                 catch(error) {
                     console.log(error.response.data);
                 }
-            }
-
-            
-            const uploadChunkStream = () => {
-                console.log('uploadChunk called');
-                console.log('start value: ' + start);
-                console.log('end value: ' + end);
-                return fs.createReadStream(`temp_files_to_upload/${req.file.filename}`, {start: start, end: end});
             }
 
             
@@ -191,32 +182,6 @@ module.exports = app => {
                         }
                     })
                 })
-                /*
-                sessionStart((sessionId) => {
-                    console.log('calling session append from dowork');
-                    if(continueCheck() === true) {
-                        sessionAppend(sessionId, () => {
-                            if(continueCheck() === true) {
-                                dowork();
-                            }
-                            else {
-                                console.log('calling session finish from dowork');
-                                sessionFinish(sessionId);
-                            }
-                        })
-                    }
-                    else {
-                        console.log('calling session append for last time... from dowork');
-                        sessionAppend(sessionId, () => { 
-                            console.log('calling session finish from dowork');
-                            console.log(sessionId);
-                            sessionFinish(sessionId);
-                        })
-                        
-                        
-                    }
-                })
-                */
             }
             dowork();
 
