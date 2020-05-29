@@ -6,6 +6,271 @@ const fs = require('fs');
 const multer = require('multer');
 const upload = multer({dest: 'temp_files_to_upload'});
 
+/*
+Observation...
+start value = 364,309
+end value = 374,309
+diference is 10,000
+the uploaded size of the file was 30,000
+*/
+
+
+module.exports = app => {
+
+    app.post('/api/testupload2/:file/:size', upload.single('myFile'), (req, res) => {
+        console.log('begin upload process...');
+
+        const getResponseFromBigFile = () => {
+
+            console.log('big file function fired...');
+            const CHUNK_LENGTH = 50000; //50kb
+            //const CHUNK_LENGTH = 50000000; //50MB
+            const FILE_SIZE = parseInt(req.params.size);
+            let bytesUploaded = 0;
+            let isClosed = false;
+            let start = 0;
+            let end = CHUNK_LENGTH - 1;
+            let offset = 0;
+
+            const continueCheck = () => {
+                console.log('continue check called');
+                //end
+                if(bytesUploaded + CHUNK_LENGTH >= FILE_SIZE) {
+                    return false;
+                }
+                //start or continue upload
+                else {
+                    return true;
+                }
+            }
+
+            const setStartEnd = () => {
+                console.log('startEnd called.');
+                //end
+                if(bytesUploaded + CHUNK_LENGTH >= FILE_SIZE) {
+                    console.log('set isClosed to true');
+                    start = bytesUploaded;
+                    end = FILE_SIZE;
+                }
+                //start or continue upload
+                else {
+                    start = bytesUploaded;
+                    end = bytesUploaded + CHUNK_LENGTH - 1;
+                }
+            }
+
+
+            const sessionStart = async (cb) => {
+                console.log('sessionStart function fired...');
+                const url = 'https://content.dropboxapi.com/2/files/upload_session/start';
+                try { 
+                    const response = await axios({
+                        method: 'POST',
+                        url: url,
+                        headers: {
+                            'Content-Type': 'application/octet-stream',
+                            'Authorization': `Bearer ${dropboxAccessToken}`,
+                            'Dropbox-API-Arg': JSON.stringify({
+                                'close': isClosed
+                            })
+                        },
+                        'maxContentLength': Infinity,
+                        'maxBodyLength': Infinity,
+                        data: uploadChunkStream()
+                    })
+                    console.log('sessionStart result:', response.data);
+                    bytesUploaded = continueCheck() ? bytesUploaded + CHUNK_LENGTH : FILE_SIZE - bytesUploaded;
+                    if(continueCheck()){console.log(end)}
+                    console.log('bytes uploaded: ' + bytesUploaded);
+                    setStartEnd();
+                    cb(response.data.session_id);
+                }
+                catch(error) {
+                    console.log(error.response.data);
+                }
+            }
+
+            const sessionAppend = async (sessionId, cb) => {
+                console.log('sessionAppend function fired...');
+                const url = 'https://content.dropboxapi.com/2/files/upload_session/append_v2';
+                console.log('offset logic: ');
+                console.log(isClosed ? FILE_SIZE : bytesUploaded);
+                try { 
+                    const response = await axios({
+                        method: 'POST',
+                        url: url,
+                        headers: {
+                            'Content-Type': 'application/octet-stream',
+                            'Authorization': `Bearer ${dropboxAccessToken}`,
+                            'Dropbox-API-Arg': JSON.stringify({
+                                'cursor': {
+                                    'session_id': sessionId,
+                                    //'offset': isClosed ? FILE_SIZE : bytesUploaded
+                                    'offset': CHUNK_LENGTH
+                                    //'offset': bytesUploaded
+                                },
+                                'close': isClosed
+                            })
+                        },
+                        'maxContentLength': Infinity,
+                        'maxBodyLength': Infinity,
+                        data: uploadChunkStream()
+                    })
+                    console.log('sessionAppend result:', response.data);
+                    //bytesUploaded = bytesUploaded + CHUNK_LENGTH;
+                    bytesUploaded = continueCheck() ? bytesUploaded + CHUNK_LENGTH : end;
+                    if(continueCheck()){console.log(end)}
+                    console.log('bytes uploaded: ' + bytesUploaded);
+                    setStartEnd();
+                    cb();
+                }
+                catch(error) {
+                    console.log(error.response.data);
+                }
+            }
+
+            const sessionFinish = async (sessionId) => {
+                console.log('sessionFinish function fired...');
+                const url = 'https://content.dropboxapi.com/2/files/upload_session/finish';
+                try {
+                    const response = await axios({
+                        method: 'POST',
+                        url: url,
+                        headers: {
+                            'Content-Type': 'application/octet-stream',
+                            'Authorization': `Bearer ${dropboxAccessToken}`,
+                            'Dropbox-API-Arg': JSON.stringify({
+                                'cursor': {
+                                    'session_id': sessionId,
+                                    //'offset': bytesUploaded
+                                    'offset': 74309
+                                    //'offset': 0
+                                },
+                                'commit': {
+                                    'path': `/media/${req.file.originalname}`,
+                                    'mode': 'add',
+                                    'autorename': true,
+                                    'mute': false,
+                                    'strict_conflict': false
+                                }
+                            })
+                        },
+                        'maxContentLength': Infinity,
+                        'maxBodyLength': Infinity,
+                        data: uploadChunkStream()
+                    })
+                console.log('sessionFinish result:', response.data);
+                res.send(response.data);
+                //deleteTempFile(response);
+                }
+                catch(error) {
+                    console.log(error.response.data);
+                }
+            }
+
+            
+            const uploadChunkStream = () => {
+                console.log('uploadChunk called');
+                console.log('start value: ' + start);
+                console.log('end value: ' + end);
+                return fs.createReadStream(`temp_files_to_upload/${req.file.filename}`, {start: start, end: end});
+            }
+
+            
+            const dowork = () => {
+                
+                sessionStart((sessionId) => {
+                    sessionAppend(sessionId, () => { 
+                        if(continueCheck() === true) {
+                            dowork();
+                        }
+                        else {
+                            console.log('calling session finish from dowork');
+                            console.log(sessionId);
+                            sessionFinish(sessionId);
+                        }
+                    })
+                })
+                /*
+                sessionStart((sessionId) => {
+                    console.log('calling session append from dowork');
+                    if(continueCheck() === true) {
+                        sessionAppend(sessionId, () => {
+                            if(continueCheck() === true) {
+                                dowork();
+                            }
+                            else {
+                                console.log('calling session finish from dowork');
+                                sessionFinish(sessionId);
+                            }
+                        })
+                    }
+                    else {
+                        console.log('calling session append for last time... from dowork');
+                        sessionAppend(sessionId, () => { 
+                            console.log('calling session finish from dowork');
+                            console.log(sessionId);
+                            sessionFinish(sessionId);
+                        })
+                        
+                        
+                    }
+                })
+                */
+            }
+            dowork();
+
+        }
+
+        try {
+            const filePath = `temp_files_to_upload/${req.file.filename}`;
+            //checks if file is uploaded to temp_files_to_upload folder
+            fs.access(filePath, fs.constants.F_OK, async (err) => {
+                if(err) {
+                    console.log('file has not been uploaded.');
+                }
+                //file exists, do axios call to dropbox
+                else {
+                    console.log('file has been uploaded to node server...');
+                    getResponseFromBigFile();
+                }
+            });
+            
+        }
+        catch(error) {
+          res.send(error);
+        }
+
+    })
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* original code from 5/28/2020
 module.exports = app => {
 
     app.post('/api/testupload2/:file/:size', upload.single('myFile'), (req, res) => {
@@ -172,3 +437,4 @@ module.exports = app => {
 
     })
 }
+*/
