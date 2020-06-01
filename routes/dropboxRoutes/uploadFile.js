@@ -78,8 +78,155 @@ module.exports = app => {
             deleteTempFile(response.data);
             console.log('done.');
         }
+        
+        const getResponseFromBigFile = () => {
+            const CHUNK_LENGTH = 50000000; //50MB
+
+            const FILE_PATH = `temp_files_to_upload/${req.file.filename}`;
+            const FILE_SIZE = fs.statSync(FILE_PATH).size;
+
+            const getNextChunkStream = (start, end) => fs.createReadStream(FILE_PATH, { start, end });
+
+            const append = (sessionId, start, end) => {
+                if (start === FILE_SIZE) { // this means we have entire file uploaded, so commit
+                    return sessionFinish(sessionId);
+                }
+
+                if (end > FILE_SIZE) { // this last chunk might be smaller
+                    end = FILE_SIZE - 1;
+                    console.log(`uploading ${end - start + 1} bytes (from ${start} to ${end}) (last smaller chunk)`);
+                    //res.write((end + 1 / FILE_SIZE).toString());
+                    res.write('hello');
+                    res.end('done');
+                    return sessionAppend(sessionId, start, FILE_SIZE - 1, () => {
+                        return sessionFinish(sessionId, FILE_SIZE);
+                    })
+                }
+                console.log(`uploading ${end - start + 1} bytes (from ${start} to ${end})`);
+                sessionAppend(sessionId, start, end, () => {
+                    append(sessionId, end + 1, end + CHUNK_LENGTH)
+                });
+            }
+
+            sessionStart((sessionId) => {
+                append(sessionId, 0, CHUNK_LENGTH - 1) // first chunk
+            });
+
+            function sessionStart(cb) {
+                dropbox({
+                    resource: 'files/upload_session/start',
+                    parameters: {
+                        close: false
+                    },
+                }, (err, result, response) => {
+                    if (err) { return console.log('sessionStart error: ', err) }
+                    console.log('sessionStart result:', result);
+                    
+                    cb(result.session_id);
+                });
+            }
+
+            function sessionAppend(sessionId, start, end, cb) {
+                dropbox({
+                    resource: 'files/upload_session/append',
+                    parameters: {
+                        cursor: {
+                            session_id: sessionId,
+                            offset: start
+                        },
+                        close: false,
+                    },
+                    readStream: getNextChunkStream(start, end)
+                }, (err, result, response) => {
+                    if (err) { return console.log('sessionAppend error: ', err) }
+                    cb();
+                });
+            }
+
+            function sessionFinish(sessionId) {
+                dropbox({
+                    resource: 'files/upload_session/finish',
+                    parameters: {
+                        cursor: {
+                            session_id: sessionId,
+                            offset: FILE_SIZE
+                        },
+                        commit: {
+                            path: `/media/${req.file.originalname}`,
+                            mode: 'add',
+                            autorename: true,
+                            mute: false
+                        }
+                    }
+                }, (err, result, response) => {
+                    if (err) { return console.log('sessionFinish error: ', err) }
+                    console.log('sessionFinish result:', result);
+                    //res.send(result);
+                    res.end(result);
+                });
+            }
+        }
+        
 
 
+        try {
+            const filePath = `temp_files_to_upload/${req.file.filename}`;
+
+            //checks if file is uploaded to temp_files_to_upload folder
+            fs.access(filePath, fs.constants.F_OK, async (err) => {
+                if(err) {
+                    console.log('file has not been uploaded.');
+                }
+                //file exists, do axios call to dropbox
+                else {
+                    console.log('file has been uploaded to node server...');
+                    //getResponse();
+                    getResponseFromBigFile();
+                    //if file is less than 150MB
+                    /*
+                    if((req.params.size * .000001) < 150)  {
+                        console.log('file is less than 150MB...');
+                        getResponse();
+                    } 
+                    else {
+                        console.log('file is greater or equal to 150MB...');
+                        //https://stackoverflow.com/questions/40114056/how-to-use-dropbox-upload-session-for-files-larger-than-150mb
+                        getResponseFromBigFile();
+                    }
+                    */
+                }
+            });
+            
+        }
+        catch(error) {
+          res.send(error);
+        }
+
+    });
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
         const getResponseFromBigFile = () => {
             const CHUNK_LENGTH = 100000;
             const FILE_SIZE = parseInt(req.params.size);
@@ -109,7 +256,8 @@ module.exports = app => {
                 return fs.createReadStream(`temp_files_to_upload/${req.file.filename}`, {start: start, end: end});
             }
             */
-           
+            
+            /*
             let start;
             let end;
             const uploadChunkStream = () => {
@@ -230,41 +378,6 @@ module.exports = app => {
 
 
         }
+        */
 
 
-        try {
-            const filePath = `temp_files_to_upload/${req.file.filename}`;
-
-            //checks if file is uploaded to temp_files_to_upload folder
-            fs.access(filePath, fs.constants.F_OK, async (err) => {
-                if(err) {
-                    console.log('file has not been uploaded.');
-                }
-                //file exists, do axios call to dropbox
-                else {
-                    console.log('file has been uploaded to node server...');
-                    getResponse();
-                    //getResponseFromBigFile();
-                    //if file is less than 150MB
-                    /*
-                    if((req.params.size * .000001) < 150)  {
-                        console.log('file is less than 150MB...');
-                        getResponse();
-                    } 
-                    else {
-                        console.log('file is greater or equal to 150MB...');
-                        //https://stackoverflow.com/questions/40114056/how-to-use-dropbox-upload-session-for-files-larger-than-150mb
-                        getResponseFromBigFile();
-                    }
-                    */
-                }
-            });
-            
-        }
-        catch(error) {
-          res.send(error);
-        }
-
-    });
-
-}
