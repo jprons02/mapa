@@ -24,7 +24,8 @@
     "multer": "^1.4.2",
     "nodemon": "^2.0.3",
     "passport": "^0.4.1",
-    "passport-google-oauth20": "^2.0.0"
+    "passport-google-oauth20": "^2.0.0",
+    "socket.io": "^2.3.0"
   },
   "comments": {
     "scripts": "stop-linux is used to solve EADDRINUSE error. There was a process running that I couldn't find."

@@ -5,29 +5,17 @@ const multer = require('multer');
 const upload = multer({dest: 'temp_files_to_upload'});
 
 //https://github.com/adasq/dropbox-v2-api
-/*
-const dropboxV2Api = require('dropbox-v2-api');
-const path = require('path');
-const credentials = JSON.parse(fs.readFileSync(path.join(__dirname, 'credentials.json')));
-const dropbox = dropboxV2Api.authenticate({
-    token: credentials.TOKEN
-});
-*/
 const dropbox = require('dropbox-v2-api').authenticate({ token: dropboxAccessToken });
 
-
-
-
-
-//100% have to use multer... the functions that were listening for data were firing before axios calls could resolve.
-//-accept data in formData type format from frontend 
-//-then store in file path in backend
-//-then send to dropbox from filepath
+//accept data in formData type format from frontend 
+//then store in file path in backend
+//then send to dropbox from filepath
 
 //readable stream docs: https://nodejs.org/api/stream.html#stream_readable_streams
 
 
-module.exports = app => {
+module.exports = (app, io) => {
+    
 
     app.post('/api/testupload/:file/:size', upload.single('myFile'), (req, res) => {
         console.log('begin upload process...');
@@ -80,7 +68,8 @@ module.exports = app => {
         }
         
         const getResponseFromBigFile = () => {
-            const CHUNK_LENGTH = 50000000; //50MB
+            //const CHUNK_LENGTH = 50000000; //50MB
+            const CHUNK_LENGTH = 100000; //100kb
 
             const FILE_PATH = `temp_files_to_upload/${req.file.filename}`;
             const FILE_SIZE = fs.statSync(FILE_PATH).size;
@@ -94,10 +83,10 @@ module.exports = app => {
 
                 if (end > FILE_SIZE) { // this last chunk might be smaller
                     end = FILE_SIZE - 1;
+
                     console.log(`uploading ${end - start + 1} bytes (from ${start} to ${end}) (last smaller chunk)`);
-                    //res.write((end + 1 / FILE_SIZE).toString());
-                    res.write('hello');
-                    res.end('done');
+                    //io.sockets.emit('message', JSON.stringify({size: 'hello from backend socket.io'}));
+
                     return sessionAppend(sessionId, start, FILE_SIZE - 1, () => {
                         return sessionFinish(sessionId, FILE_SIZE);
                     })
@@ -121,12 +110,16 @@ module.exports = app => {
                 }, (err, result, response) => {
                     if (err) { return console.log('sessionStart error: ', err) }
                     console.log('sessionStart result:', result);
-                    
                     cb(result.session_id);
                 });
             }
 
             function sessionAppend(sessionId, start, end, cb) {
+                //io.sockets needed to send data in real time to client. needed for progress bar.
+                //io.sockets.emit('message', JSON.stringify({size: (end + 1)}));
+                const uploadedPercentage = ((end + 1) / FILE_SIZE) * 100
+                io.sockets.emit('message', uploadedPercentage);
+
                 dropbox({
                     resource: 'files/upload_session/append',
                     parameters: {
@@ -161,8 +154,7 @@ module.exports = app => {
                 }, (err, result, response) => {
                     if (err) { return console.log('sessionFinish error: ', err) }
                     console.log('sessionFinish result:', result);
-                    //res.send(result);
-                    res.end(result);
+                    res.send(result);
                 });
             }
         }

@@ -2,9 +2,18 @@ import React from 'react';
 import {connect} from 'react-redux';
 import axios from 'axios';
 import {selectFile} from '../actions';
-
+//socket.io for upload progress
+import io from 'socket.io-client';
+const socket = io('http://localhost:4000');
 
 class Upload extends React.Component {
+    
+    componentDidMount = () => {
+        socket.on('message', function(data){
+            console.log(data);
+        })
+        socket.on('disconnect', function(){});
+    }
 
     uploadFile = async () => {
         if(this.props.selectedFile.name) {
@@ -32,12 +41,16 @@ class Upload extends React.Component {
                 //data: this.props.selectedFile //working without multer
                 data: formData
             })
+            
             console.log(response.data);
         }
         else {
             alert("Please select a file.");
         }
     }
+
+    
+
 
     render() {
         console.log(this.props);

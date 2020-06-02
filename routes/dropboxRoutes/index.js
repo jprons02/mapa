@@ -9,9 +9,9 @@ const uploadFile = require('./uploadFile');
 const listFolder = require('./listFolder');
 const testingdropbox = require('./testingdropboxUpload');
 
-module.exports = app => {
+module.exports = (app, io) => {
     downloadFile(app);
-    uploadFile(app);
+    uploadFile(app, io);
     listFolder(app);
     testingdropbox(app);
 }

@@ -26,8 +26,15 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+const http = require('http').createServer(app);
+const io = require('socket.io')(http);
+http.listen(4000, () => {
+    console.log('listening on *:4000');
+});
+
 const PORT = process.env.PORT || 5000;
 
+//needed for Google OAuth
 app.use(
     cookieSession({
         //math = 30 days. it has to be passed in as millisecconds.
@@ -44,7 +51,7 @@ app.use(passport.session());
 addUserRoute(app);
 loginRoute(app);
 googleOAuthRoute(app);
-dropboxRoutes(app);
+dropboxRoutes(app, io);
 
 
 app.use('/admin/tools/testing', (req, res) => {
