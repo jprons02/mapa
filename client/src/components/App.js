@@ -2,12 +2,13 @@ import React from 'react';
 import {BrowserRouter, Route} from 'react-router-dom';
 import {connect} from 'react-redux';
 
-import Header from './Header';
+import NavMenu from './NavMenu';
 import Login from './Login';
 import Home from './Home';
 import AdminTools from './AdminTools';
 import MediaList from './MediaList';
 import Upload from './Upload';
+import { Container } from 'semantic-ui-react';
 
 
 class App extends React.Component {
@@ -17,14 +18,16 @@ class App extends React.Component {
             <div>
                 <div className="container">
                     <BrowserRouter>
-                        <Header />
-                        <div>
-                            <Route exact path="/login" component={Login} />
-                            <Route exact path="/admintools" component={AdminTools} />
-                            <Route exact path="/" component={Home} />
-                            <Route exact path="/media" component={MediaList} />
-                            <Route exact path="/upload" component={Upload} />
-                        </div>
+                        <Container>
+                            <NavMenu />
+                            <div style={{paddingTop: "80px"}}>
+                                <Route exact path="/login" component={Login} />
+                                <Route exact path="/admintools" component={AdminTools} />
+                                <Route exact path="/" component={Home} />
+                                <Route exact path="/media" component={MediaList} />
+                                <Route exact path="/upload" component={Upload} />
+                            </div>
+                        </Container>
                     </BrowserRouter>
                 </div>
             </div>

@@ -2,6 +2,7 @@ import React from 'react';
 import {connect} from 'react-redux';
 import axios from 'axios';
 import {selectFile} from '../actions';
+import {Button} from 'semantic-ui-react';
 //socket.io for upload progress
 import io from 'socket.io-client';
 const socket = io('http://localhost:4000');
@@ -59,7 +60,7 @@ class Upload extends React.Component {
                 <h1>Upload File</h1>
                 <input type="file" name="file" id="file" onChange={this.props.selectFile}/>
                 <br />
-                <button onClick={this.uploadFile}>Upload</button>
+                <Button onClick={this.uploadFile}>Upload</Button>
             </div>
         )
     }
@@ -68,5 +69,7 @@ class Upload extends React.Component {
 const mapStateToProps = (state) => {
     return state;
 }
+
+//<button onClick={this.uploadFile}>Upload</button>
 
 export default connect(mapStateToProps,{selectFile})(Upload);

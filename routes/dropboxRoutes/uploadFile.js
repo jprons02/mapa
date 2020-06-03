@@ -85,7 +85,6 @@ module.exports = (app, io) => {
                     end = FILE_SIZE - 1;
 
                     console.log(`uploading ${end - start + 1} bytes (from ${start} to ${end}) (last smaller chunk)`);
-                    //io.sockets.emit('message', JSON.stringify({size: 'hello from backend socket.io'}));
 
                     return sessionAppend(sessionId, start, FILE_SIZE - 1, () => {
                         return sessionFinish(sessionId, FILE_SIZE);
@@ -116,7 +115,6 @@ module.exports = (app, io) => {
 
             function sessionAppend(sessionId, start, end, cb) {
                 //io.sockets needed to send data in real time to client. needed for progress bar.
-                //io.sockets.emit('message', JSON.stringify({size: (end + 1)}));
                 const uploadedPercentage = ((end + 1) / FILE_SIZE) * 100
                 io.sockets.emit('message', uploadedPercentage);
 
@@ -167,25 +165,20 @@ module.exports = (app, io) => {
             //checks if file is uploaded to temp_files_to_upload folder
             fs.access(filePath, fs.constants.F_OK, async (err) => {
                 if(err) {
-                    console.log('file has not been uploaded.');
+                    console.log('file has not been uploaded to server temp folder.');
                 }
                 //file exists, do axios call to dropbox
                 else {
                     console.log('file has been uploaded to node server...');
-                    //getResponse();
-                    getResponseFromBigFile();
                     //if file is less than 150MB
-                    /*
                     if((req.params.size * .000001) < 150)  {
                         console.log('file is less than 150MB...');
                         getResponse();
                     } 
                     else {
                         console.log('file is greater or equal to 150MB...');
-                        //https://stackoverflow.com/questions/40114056/how-to-use-dropbox-upload-session-for-files-larger-than-150mb
                         getResponseFromBigFile();
                     }
-                    */
                 }
             });
             
