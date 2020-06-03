@@ -1,8 +1,20 @@
 import React from 'react';
 import {connect} from 'react-redux';
-import {fetchList} from '../actions'
+import {fetchList} from '../actions';
+import {Icon, List, Header} from 'semantic-ui-react';
 
 class MediaList extends React.Component {
+
+    //download
+    //<Icon name='download' size='mini' />
+    /*
+    <List>
+        <List.Item>
+            <List.Icon name='download' />
+            <List.Content>Semantic UI</List.Content>
+        </List.Item>
+    </List>
+    */
 
     componentDidMount() {
         this.props.fetchList();
@@ -68,7 +80,103 @@ class MediaList extends React.Component {
         return newMediaObj;
     }
 
+    //maybe i can pass language and media type in this function... in stead of having 3 of the same functions...    
+    renderVideo = (language) => {
+        if(this.sortItems()[language].video[0]) { 
+            return (
+                <React.Fragment>
+                <Header as='h4'>Video</Header>
+                <List>
+                    {this.sortItems()[language].video.map((listItem) => {
+                        return (
+                            <List.Item style={{marginBottom: '4px'}} key={listItem.id}>
+                                <List.Icon name='download' />
+                                <List.Content>
+                                    <List.Header href={`/api/download${listItem.path_lower}`} as='a'>{listItem.name}</List.Header>
+                                    <List.Description>
+                                    Spanish Commercial
+                                    </List.Description>
+                                </List.Content>
+                            </List.Item>
+                        )
+                    })}
+                </List>
+                </React.Fragment>
+            )
+        }
+        else {
+            return null;
+        }
+    }
+
     
+    renderList = (language) => {
+        return (
+            <div>
+                {this.renderVideo(language)}
+                {this.sortItems()[language].audio[0] ? <Header as='h4'>Audio</Header> : ''}
+                <List>
+                    {this.sortItems()[language].audio.map((listItem) => {
+                        return (
+                            <List.Item key={listItem.id}>
+                                <List.Icon name='download' />
+                                <List.Content>
+                                    <a href={`/api/download${listItem.path_lower}`}>
+                                    {listItem.name}
+                                    </a>
+                                </List.Content>
+                            </List.Item>
+                        )
+                    })}
+                </List>
+                {this.sortItems()[language].image[0] ? <Header as='h4'>Image</Header> : ''}
+                <List>
+                    {this.sortItems()[language].image.map((listItem) => {
+                        return (
+                            <List.Item key={listItem.id}>
+                                <List.Icon name='download' />
+                                <List.Content>
+                                    <a href={`/api/download${listItem.path_lower}`}>
+                                    {listItem.name}
+                                    </a>
+                                </List.Content>
+                            </List.Item>
+                        )
+                    })}
+                </List>
+            </div>
+        )
+    }
+    
+    
+    render() {
+        //console.log(this.props.mediaList);
+        return ( 
+            <div>
+                <div>
+                    <Header as='h2'>English</Header>
+                    {this.props.mediaList.entries ? this.renderList("english") : "loading list..."}
+                </div>
+                <div style={{marginTop: '60px'}}>
+                    <Header as='h2'>Spanish</Header>
+                    {this.props.mediaList.entries ? this.renderList("spanish") : "loading list..."}
+                </div>
+            </div>
+            
+        )
+    }
+}
+
+const mapStateToProps = (state) => {
+    return state;
+}
+
+export default connect(mapStateToProps,{fetchList})(MediaList);
+
+
+
+
+/*
     renderList = (language) => {
         return (
             <div>
@@ -105,28 +213,4 @@ class MediaList extends React.Component {
             </div>
         )
     }
-    
-    
-    render() {
-        console.log(this.props.mediaList);
-        return ( 
-            <div>
-                <div>
-                    <h2>English</h2>
-                    {this.props.mediaList.entries ? this.renderList("english") : "loading list..."}
-                </div>
-                <div>
-                    <h2>Spanish</h2>
-                    {this.props.mediaList.entries ? this.renderList("spanish") : "loading list..."}
-                </div>
-            </div>
-            
-        )
-    }
-}
-
-const mapStateToProps = (state) => {
-    return state;
-}
-
-export default connect(mapStateToProps,{fetchList})(MediaList);
+*/
