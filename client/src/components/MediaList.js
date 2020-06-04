@@ -1,30 +1,19 @@
 import React from 'react';
 import {connect} from 'react-redux';
-import {fetchList} from '../actions';
+import axios from 'axios';
+import FileSaver from 'file-saver';
+import {fetchList, downloadingFile} from '../actions';
 import {Icon, List, Header} from 'semantic-ui-react';
 
 class MediaList extends React.Component {
 
-    //download
-    //<Icon name='download' size='mini' />
-    /*
-    <List>
-        <List.Item>
-            <List.Icon name='download' />
-            <List.Content>Semantic UI</List.Content>
-        </List.Item>
-    </List>
-    */
-
     componentDidMount() {
         this.props.fetchList();
     }
-
     componentDidUpdate() {
         //determine type of file and organize as such.
         this.sortItems();
     }
-
 
     //Sort files by language and by type. Using regex for both. 
     //Regex for language: beginning of file MUST be named sp_ to find spanish files, default is english. 
@@ -38,9 +27,9 @@ class MediaList extends React.Component {
         //sort by language
         this.props.mediaList.entries.map((listItem) => {
             if(spanishRegex.test(listItem.name)) {
-                spanishMediaList.push(listItem);
+                return spanishMediaList.push(listItem);
             } else {
-                englishMediaList.push(listItem);
+                return englishMediaList.push(listItem);
             }
         });
         
@@ -53,17 +42,16 @@ class MediaList extends React.Component {
             const audioList = [];
             const imageList = [];
             languageList.map((listItem) => {
-                switch (true) {
-                    case videoRegex.test(listItem.name):
-                        videoList.push(listItem);
-                        break;
-                    case audioRegex.test(listItem.name):
-                        audioList.push(listItem);
-                        break;
-                    case imageRegex.test(listItem.name):
-                        imageList.push(listItem);
-                        break;
+                if(videoRegex.test(listItem.name)) {
+                    return videoList.push(listItem);
                 }
+                else if(audioRegex.test(listItem.name)) {
+                    return audioList.push(listItem);
+                }
+                else if(imageRegex.test(listItem.name)) {
+                    return imageList.push(listItem);
+                }
+                return null;
             });
 
             return {
@@ -80,21 +68,45 @@ class MediaList extends React.Component {
         return newMediaObj;
     }
 
-    //maybe i can pass language and media type in this function... in stead of having 3 of the same functions...    
-    renderVideo = (language) => {
-        if(this.sortItems()[language].video[0]) { 
+
+    //download on file click
+    downloadFile = async (url, file) => {
+        this.props.downloadingFile(true);
+
+        const response = await axios({
+            method: 'GET',
+            url: url,
+            responseType: 'arraybuffer',
+            headers: {
+                'Accept': 'application/octet-stream'
+            }
+        })
+        
+        if(response.data) {
+            this.props.downloadingFile(false);
+        }
+        const blob = new Blob([response.data], {type: "application/octet-stream"});
+        FileSaver.saveAs(blob, file);
+        
+    }
+
+    
+    renderMediaContent = (language, media, title) => {
+        if(this.sortItems()[language][media][0]) { 
             return (
                 <React.Fragment>
-                <Header as='h4'>Video</Header>
+                <Header as='h4'>{title}</Header>
                 <List>
-                    {this.sortItems()[language].video.map((listItem) => {
+                    {this.sortItems()[language][media].map((listItem) => {
                         return (
                             <List.Item style={{marginBottom: '4px'}} key={listItem.id}>
                                 <List.Icon name='download' />
                                 <List.Content>
-                                    <List.Header href={`/api/download${listItem.path_lower}`} as='a'>{listItem.name}</List.Header>
+                                    <List.Header onClick={() => this.downloadFile(`/api/download${listItem.path_lower}`, listItem.name)}  as='a'>{listItem.name}</List.Header>
                                     <List.Description>
-                                    Spanish Commercial
+                                        {Math.ceil(listItem.size / 1000000) < 1000 ? 
+                                            (listItem.size / 1000000).toFixed(2) + 'MB' : 
+                                            (listItem.size / 1000000000).toFixed(2) + 'GB'}
                                     </List.Description>
                                 </List.Content>
                             </List.Item>
@@ -113,46 +125,20 @@ class MediaList extends React.Component {
     renderList = (language) => {
         return (
             <div>
-                {this.renderVideo(language)}
-                {this.sortItems()[language].audio[0] ? <Header as='h4'>Audio</Header> : ''}
-                <List>
-                    {this.sortItems()[language].audio.map((listItem) => {
-                        return (
-                            <List.Item key={listItem.id}>
-                                <List.Icon name='download' />
-                                <List.Content>
-                                    <a href={`/api/download${listItem.path_lower}`}>
-                                    {listItem.name}
-                                    </a>
-                                </List.Content>
-                            </List.Item>
-                        )
-                    })}
-                </List>
-                {this.sortItems()[language].image[0] ? <Header as='h4'>Image</Header> : ''}
-                <List>
-                    {this.sortItems()[language].image.map((listItem) => {
-                        return (
-                            <List.Item key={listItem.id}>
-                                <List.Icon name='download' />
-                                <List.Content>
-                                    <a href={`/api/download${listItem.path_lower}`}>
-                                    {listItem.name}
-                                    </a>
-                                </List.Content>
-                            </List.Item>
-                        )
-                    })}
-                </List>
+                {this.renderMediaContent(language, 'video', 'Video')}
+                {this.renderMediaContent(language, 'audio', 'Audio')}
+                {this.renderMediaContent(language, 'image', 'Image')}
             </div>
         )
     }
     
     
     render() {
-        //console.log(this.props.mediaList);
         return ( 
             <div>
+                <div id='downloading' style={{marginBottom: '30px', display: this.props.isLoading ? 'block' : 'none' || 'none'}}>
+                    <Icon loading name='spinner' /> DOWNLOADING...
+                </div>
                 <div>
                     <Header as='h2'>English</Header>
                     {this.props.mediaList.entries ? this.renderList("english") : "loading list..."}
@@ -171,46 +157,4 @@ const mapStateToProps = (state) => {
     return state;
 }
 
-export default connect(mapStateToProps,{fetchList})(MediaList);
-
-
-
-
-/*
-    renderList = (language) => {
-        return (
-            <div>
-                <h3>Videos</h3>
-                <ul>
-                    {this.sortItems()[language].video.map((listItem) => {
-                        return (
-                            <li key={listItem.id}>
-                                <a href={`/api/download${listItem.path_lower}`}>{listItem.name}</a>
-                            </li>
-                        )
-                    })}
-                </ul>
-                <h3>Audio</h3>
-                <ul>
-                    {this.sortItems()[language].audio.map((listItem) => {
-                        return (
-                            <li key={listItem.id}>
-                                <a href={`/api/download${listItem.path_lower}`}>{listItem.name}</a>
-                            </li>
-                        )
-                    })}
-                </ul>
-                <h3>Image</h3>
-                <ul>
-                    {this.sortItems()[language].image.map((listItem) => {
-                        return (
-                            <li key={listItem.id}>
-                                <a href={`/api/download${listItem.path_lower}`}>{listItem.name}</a>
-                            </li>
-                        )
-                    })}
-                </ul>
-            </div>
-        )
-    }
-*/
+export default connect(mapStateToProps,{fetchList, downloadingFile})(MediaList);

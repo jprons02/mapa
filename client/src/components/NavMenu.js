@@ -19,11 +19,11 @@ class NavMenu extends React.Component {
             username: null,
             isMatch: null
         });
+        this.props.history.push('/login');
     }
 
     renderNav = (pages) => {
         //map over pages object
-        console.log(pages);
         return (
             <Menu fixed='top' inverted>
                 <Menu.Item as={Link} to='/home' header>
@@ -35,17 +35,14 @@ class NavMenu extends React.Component {
                         {pages.map((page) => <Dropdown.Item style={{color: "black !important"}} key={page[1]} as={Link} to={page[0]}>{page[1]}</Dropdown.Item>)}
                     </Dropdown.Menu>
                 </Dropdown>
-                <Menu.Item as={Link} name='Login' to='/login' header></Menu.Item>
+                <Menu.Item as='a' name='Logout' onClick={() => this.logout()} header></Menu.Item>
             </Menu>
         )          
     }
-    //{pages.map((page) => <Menu.Item key={page[1]} as={Link} name={page[1]} to={page[0]} header></Menu.Item>)}
-    //as={ Link } name='profile' to='profile'
-    //<Menu.Item><Link to='/'>{'Home'}</Link></Menu.Item>
 
     navLogic = () => {
         const user = this.props.isSignedIn.username;
-        const signedIn = this.props.isSignedIn.isMatch;
+        //const signedIn = this.props.isSignedIn.isMatch;
 
         let adminPages;
         let designPages;
@@ -60,22 +57,20 @@ class NavMenu extends React.Component {
         switch(user) {
             case 'admin':
                 adminPages = pages;
-                console.log(adminPages);
                 return this.renderNav(adminPages);
-                break;
             
             case 'design':
                 designPages = pages;
                 delete designPages.admintools;
                 return this.renderNav(designPages);
-                break;
 
             case 'media':
                 mediaPages = pages;
                 delete mediaPages.admintools;
                 delete mediaPages.upload;
                 return this.renderNav(mediaPages);
-                break;
+            default:
+                return null;
         }
     }
 

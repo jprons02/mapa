@@ -2,7 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import {connect} from 'react-redux';
 import {setSignIn} from '../actions';
-import {Button, Form, Grid, Header, Image, Message, Segment} from 'semantic-ui-react'
+import {Button, Form, Grid, Header, Image, Segment} from 'semantic-ui-react'
 
 class Login extends React.Component {
 
@@ -41,7 +41,7 @@ class Login extends React.Component {
                         />
                         <Form.Input 
                             id="password" type="password" name="loginPassword"
-                            fluid icon='lock' iconPosition='left' placeholder='Password' type='password' 
+                            fluid icon='lock' iconPosition='left' placeholder='Password' 
                         />
 
                         <Button onClick={this.submit} color='teal' fluid size='large'>
@@ -65,20 +65,3 @@ const mapStateToProps = (state) => {
 }
 
 export default connect(mapStateToProps,{setSignIn})(Login);
-
-
-
-
-/*
-<div>
-    <form>
-        <label>Login: </label>
-        <input id="username" type="text" name="loginId" placeholder="ID" />
-        <br />
-        <label>Password: </label>
-        <input id="password" type="password" name="loginPassword" placeholder="Password" />
-        <br />
-        <input onClick={this.submit} type="submit" value="Submit" />
-    </form>
-</div>
-*/
