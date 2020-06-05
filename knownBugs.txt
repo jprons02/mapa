@@ -1,4 +1,24 @@
+Bugs...
+
+socket.io bug -
+how to recreate:
+    -let browser idle, check console
+    -error: "WebSocket is already in CLOSING or CLOSED state."
+
+
+
+
+Fixed bugs...
+
 upload bug -
 how to recreate:
     -select a file and do not click upload
     -go to select a file again, hit cancel
+how i fixed it -
+    -Error was within actions. I had to change the payload from payload: selectFile to the below:
+    export const selectFile = (event) => dispatch => {
+            const selectedFile = event.target.files[0];
+            //payload is setup to work if user selects file then clicks cancel
+            //event.target.files.length - if a file is selected it will be length of at least 1
+            dispatch({type: SELECTED_FILE, payload: event.target.files.length > 0 ? selectedFile : null});
+    }

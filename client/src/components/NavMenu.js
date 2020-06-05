@@ -27,7 +27,7 @@ class NavMenu extends React.Component {
         return (
             <Menu fixed='top' inverted>
                 <Menu.Item as={Link} to='/' header>
-                    <Image size='mini' src='/logo192.png' style={{ marginRight: '1.5em' }} />
+                    <Image size='mini' src='/micc_logo.png' style={{ marginRight: '1.5em' }} />
                     MAPA
                 </Menu.Item>
                 <Dropdown style={{fontWeight: '700'}} item simple text='Tools'>
@@ -49,8 +49,8 @@ class NavMenu extends React.Component {
         let mediaPages;
         const allPages = [
             ['/admintools', 'Admin Tools'],
-            ['/media', 'Media'],
-            ['/upload', 'Upload']
+            ['/upload', 'Upload'],
+            ['/media', 'Media']
         ];
 
         //setup page object according to user logged in
@@ -61,8 +61,9 @@ class NavMenu extends React.Component {
             
             case 'design':
                 designPages = [
-                    ['/media', 'Media'],
-                    ['/upload', 'Upload']
+                    ['/upload', 'Upload'],
+                    ['/media', 'Media']
+                    
                 ];
                 return this.renderNav(designPages);
 

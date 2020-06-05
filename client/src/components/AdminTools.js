@@ -1,6 +1,6 @@
 import React from 'react';
 import {connect} from 'react-redux';
-import {Button, Header, Form, Segment} from 'semantic-ui-react';
+import {Button, Header, Form, Segment, Grid} from 'semantic-ui-react';
 
 class AdminTools extends React.Component {
 
@@ -20,21 +20,25 @@ class AdminTools extends React.Component {
                     <li>External media houses to download media</li>
                 </ul>
                 <Header as='h5'>This user info is encrypted/decrypted with bcrypt in Nodejs and then sent/retrieved to/from MongoDB</Header>
-                <Form size='large' method='post' action='/api/adduser'>
-                    <Segment stacked>
-                        <Form.Input 
-                            type='text' name='loginId' 
-                            fluid icon='user' iconPosition='left' placeholder='Username' 
-                        />
-                        <Form.Input 
-                            type='password' name='loginPassword'
-                            fluid icon='lock' iconPosition='left' placeholder='Password' 
-                        />
-                        <Button type='submit' fluid size='large'>
-                            Add User
-                        </Button>
-                    </Segment>
-                </Form>
+                <Grid>
+                    <Grid.Column style={{ maxWidth: 450 }}>
+                        <Form size='large' method='post' action='/api/adduser'>
+                            <Segment stacked>
+                                <Form.Input 
+                                    type='text' name='loginId' 
+                                    fluid icon='user' iconPosition='left' placeholder='Username' 
+                                />
+                                <Form.Input 
+                                    type='password' name='loginPassword'
+                                    fluid icon='lock' iconPosition='left' placeholder='Password' 
+                                />
+                                <Button type='submit' fluid size='large'>
+                                    Add User
+                                </Button>
+                            </Segment>
+                        </Form>
+                    </Grid.Column>
+                </Grid>
             </React.Fragment>
         )
     }

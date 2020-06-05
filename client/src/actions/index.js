@@ -13,9 +13,10 @@ export const fetchList = () => async dispatch => {
 
 
 export const selectFile = (event) => dispatch => {
-    const selectedFile = event.target.files[0];
-
-    dispatch({type: SELECTED_FILE, payload: selectedFile});
+        const selectedFile = event.target.files[0];
+        //payload is setup to work if user selects file then clicks cancel
+        //event.target.files.length - if a file is selected it will be length of at least 1
+        dispatch({type: SELECTED_FILE, payload: event.target.files.length > 0 ? selectedFile : null});
 }
 
 

@@ -16,15 +16,9 @@ class Upload extends React.Component {
         socket.on('disconnect', function(){});
     }
 
-    fileUploaded = (bool) => {
-        if(bool) {
-            return 'block';
-        }
-        return 'none';
-    }
-
     uploadFile = async () => {
-        if(this.props.selectedFile.name) {
+        console.log(this.props.selectedFile);
+        if(this.props.selectedFile) {
             this.props.uploadingFile(true);
             //need to use FormData for backend Multer middleware.
             let formData = new FormData();
@@ -40,7 +34,6 @@ class Upload extends React.Component {
                 data: formData
             })
             if(response.data) {
-                this.fileUploaded(true);
                 this.props.uploadingFile('done');
             }
             console.log(response.data);
@@ -50,15 +43,24 @@ class Upload extends React.Component {
         }
     }
 
+    inputSelectFile = (event) => {
+        if(event) {
+            return this.props.selectFile(event);
+        }
+        return null;
+        //this.props.selectFile(null);
+    }
+
 
     render() {
+        console.log(this.props.selectedFile);
         return (
             <React.Fragment>
                 <Header as='h2'>Upload File</Header>
                 <Form style={{marginTop: '30px'}}>
                     <div style={{marginBottom: '10px', 
                         display: this.props.isUploading === true ? 'none' : this.props.isUploading === 'done' ? 'block' : 'none'}}>
-                            {this.props.selectedFile.name}<br/>
+                            {this.props.selectedFile ? this.props.selectedFile.name : 'No file selected.'}<br/>
                             has been uploaded.
                     </div>
                     <Form.Field>
@@ -76,3 +78,6 @@ const mapStateToProps = (state) => {
 }
 
 export default connect(mapStateToProps,{selectFile, uploadingFile})(Upload);
+
+
+//onChange={this.props.selectFile}
