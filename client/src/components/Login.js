@@ -30,8 +30,8 @@ class Login extends React.Component {
         return (
             <Grid textAlign='center' style={{ height: '100vh' }} verticalAlign='middle'>
                 <Grid.Column style={{ maxWidth: 450 }}>
-                    <Header as='h2' color='teal' textAlign='center'>
-                        <Image src='/logo192.png' /> Log-in to your account
+                    <Header as='h2' textAlign='center'>
+                        Log-in to your account
                     </Header>
                     <Form size='large'>
                         <Segment stacked>
@@ -44,7 +44,7 @@ class Login extends React.Component {
                             fluid icon='lock' iconPosition='left' placeholder='Password' 
                         />
 
-                        <Button onClick={this.submit} color='teal' fluid size='large'>
+                        <Button onClick={this.submit} fluid size='large'>
                             Login
                         </Button>
                         </Segment>

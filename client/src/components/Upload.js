@@ -52,18 +52,17 @@ class Upload extends React.Component {
 
 
     render() {
-        console.log(this.props);
         return (
             <React.Fragment>
                 <Header as='h2'>Upload File</Header>
-                <div style={{marginBottom: '10px', 
-                    display: this.props.isLoading === true ? 'none' : this.props.isLoading === 'done' ? 'block' : 'none'}}>
-                        {this.props.selectedFile.name}<br/>
-                        has been uploaded.
-                </div>
-                <Form>
+                <Form style={{marginTop: '30px'}}>
+                    <div style={{marginBottom: '10px', 
+                        display: this.props.isUploading === true ? 'none' : this.props.isUploading === 'done' ? 'block' : 'none'}}>
+                            {this.props.selectedFile.name}<br/>
+                            has been uploaded.
+                    </div>
                     <Form.Field>
-                        <Form.Input type='file' name='file' id='file' loading={this.props.isLoading === true ? true : false} icon='file' onChange={this.props.selectFile}/>
+                        <Form.Input type='file' name='file' id='file' loading={this.props.isUploading === true ? true : false} icon='file' onChange={this.props.selectFile}/>
                     </Form.Field>
                     <Button onClick={this.uploadFile}>Upload</Button>
                 </Form>

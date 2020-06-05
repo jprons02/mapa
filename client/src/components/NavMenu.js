@@ -26,11 +26,11 @@ class NavMenu extends React.Component {
         //map over pages object
         return (
             <Menu fixed='top' inverted>
-                <Menu.Item as={Link} to='/home' header>
+                <Menu.Item as={Link} to='/' header>
                     <Image size='mini' src='/logo192.png' style={{ marginRight: '1.5em' }} />
                     MAPA
                 </Menu.Item>
-                <Dropdown item simple text='Tools'>
+                <Dropdown style={{fontWeight: '700'}} item simple text='Tools'>
                     <Dropdown.Menu>
                         {pages.map((page) => <Dropdown.Item style={{color: "black !important"}} key={page[1]} as={Link} to={page[0]}>{page[1]}</Dropdown.Item>)}
                     </Dropdown.Menu>
@@ -47,7 +47,7 @@ class NavMenu extends React.Component {
         let adminPages;
         let designPages;
         let mediaPages;
-        const pages = [
+        const allPages = [
             ['/admintools', 'Admin Tools'],
             ['/media', 'Media'],
             ['/upload', 'Upload']
@@ -56,18 +56,20 @@ class NavMenu extends React.Component {
         //setup page object according to user logged in
         switch(user) {
             case 'admin':
-                adminPages = pages;
+                adminPages = allPages;
                 return this.renderNav(adminPages);
             
             case 'design':
-                designPages = pages;
-                delete designPages.admintools;
+                designPages = [
+                    ['/media', 'Media'],
+                    ['/upload', 'Upload']
+                ];
                 return this.renderNav(designPages);
 
             case 'media':
-                mediaPages = pages;
-                delete mediaPages.admintools;
-                delete mediaPages.upload;
+                mediaPages = [
+                    ['/media', 'Media']
+                ];
                 return this.renderNav(mediaPages);
             default:
                 return null;

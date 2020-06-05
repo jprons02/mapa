@@ -136,7 +136,7 @@ class MediaList extends React.Component {
     render() {
         return ( 
             <div>
-                <div id='downloading' style={{marginBottom: '30px', display: this.props.isLoading ? 'block' : 'none' || 'none'}}>
+                <div id='downloading' style={{marginBottom: '30px', display: this.props.isDownloading ? 'block' : 'none' || 'none'}}>
                     <Icon loading name='spinner' /> DOWNLOADING...
                 </div>
                 <div>

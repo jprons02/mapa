@@ -1,11 +1,22 @@
 import React from 'react';
+import {connect} from 'react-redux';
+import {Header} from 'semantic-ui-react';
 
-const Home = () => {
-    return (
-        <div>
-            <h1>Home Page</h1>
-        </div>
-    )
+class Home extends React.Component {
+    render() {
+        console.log(this.props);
+        return (
+        <Header as='h2'>{
+            this.props.isSignedIn.username === 'admin' ? 'Welcome Admin' : 
+            this.props.isSignedIn.username === 'design' ? 'Welcome Design Team' :
+            this.props.isSignedIn.username === 'media' ? 'Welcome Media Partner' : 'Welcome'}
+        </Header>
+        )
+    }
 }
 
-export default Home;
+const mapStateToProps = (state) => {
+    return state;
+}
+
+export default connect(mapStateToProps)(Home);
