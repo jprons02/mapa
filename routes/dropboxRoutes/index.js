@@ -8,10 +8,12 @@ const downloadFile = require('./downloadFile');
 const uploadFile = require('./uploadFile');
 const listFolder = require('./listFolder');
 const testingdropbox = require('./testingdropboxUpload');
+const deleteBatchFiles = require('./deleteBatchFiles');
 
 module.exports = (app, io) => {
     downloadFile(app);
     uploadFile(app, io);
     listFolder(app);
     testingdropbox(app);
+    deleteBatchFiles(app);
 }

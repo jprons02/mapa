@@ -1,8 +1,8 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import axios from 'axios';
-import {selectFile, uploadingFile} from '../actions';
-import {Button, Header, Form, Icon} from 'semantic-ui-react';
+import {selectFile, uploadingFile, fetchList} from '../actions';
+import {Button, Header, Form, List, Icon} from 'semantic-ui-react';
 //socket.io for upload progress
 import io from 'socket.io-client';
 const socket = io('http://localhost:4000');
@@ -14,6 +14,8 @@ class Upload extends React.Component {
             console.log(data);
         })
         socket.on('disconnect', function(){});
+
+        this.props.fetchList();
     }
 
     uploadFile = async () => {
@@ -52,7 +54,7 @@ class Upload extends React.Component {
     //stolen from - https://stackoverflow.com/questions/55464274/react-input-type-file-semantic-ui-react
     fileInputRef = React.createRef();
 
-    render() {
+    renderUpload = () => {
         return (
             <React.Fragment>
                 <Header as='h2'>Upload File</Header>
@@ -88,10 +90,74 @@ class Upload extends React.Component {
             </React.Fragment>
         )
     }
+
+    handleChange = (element) => {
+        //document.getElementById("demo");
+        console.log(element);
+        element.checked ? element.checked = true : element.checked = false;
+    }
+
+    deleteFile = async (files) => {
+        console.log('delete clicked');
+        const url = 'https://api.dropboxapi.com/2/files/delete_batch';
+        
+        /* working on this...
+        const response = await axios({
+            method: 'POST',
+            url: url,
+            responseType: 'arraybuffer',
+            headers: {
+                'Accept': 'application/octet-stream'
+            }
+        })
+        console.log(response.data);
+        */
+    }
+
+    renderDeleteList = () => {
+        if(this.props.mediaList.entries) {
+            return (
+                <React.Fragment>
+                    <Header as='h2'>Delete File(s)</Header>
+                    <Form>
+                        {this.props.mediaList.entries.map((listItem) => {
+                            const element = document.getElementById(listItem.name);
+                            return (
+                                <div key={listItem.id} style={{marginBottom: '6px'}}>
+                                    <Form.Checkbox
+                                        id={listItem.name}
+                                        inline
+                                        label={listItem.name}
+                                        onChange={() => this.handleChange(element)}
+                                    />
+                                </div>
+                            )
+                        })}
+                    </Form>
+                </React.Fragment>
+            )
+        }
+    }
+    
+
+    render() {
+        console.log(this.props.mediaList.entries);
+        return (
+            <React.Fragment>
+                <div>
+                    {this.renderUpload() || 'loading...'}
+                </div>
+                <div style={{marginTop: '50px', marginBottom: '14px'}}>
+                    {this.renderDeleteList() || 'loading...'}
+                </div>
+                <Button onClick={this.deleteFile}>Delete</Button>
+            </React.Fragment>
+        )
+    }
 }
 
 const mapStateToProps = (state) => {
     return state;
 }
 
-export default connect(mapStateToProps,{selectFile, uploadingFile})(Upload);
+export default connect(mapStateToProps,{selectFile, uploadingFile, fetchList})(Upload);
