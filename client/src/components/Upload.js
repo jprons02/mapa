@@ -8,14 +8,22 @@ import io from 'socket.io-client';
 const socket = io('http://localhost:4000');
 
 class Upload extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = { 
+            filesToDelete: [] 
+        };
+    }
     
     componentDidMount = () => {
         socket.on('message', function(data){
             console.log(data);
         })
         socket.on('disconnect', function(){});
-
+        
         this.props.fetchList();
+        this.props.uploadingFile(false);
     }
 
     uploadFile = async () => {
@@ -35,6 +43,8 @@ class Upload extends React.Component {
                 data: formData
             })
             if(response.data) {
+                this.props.fetchList();
+                console.log(response.data);
                 this.props.uploadingFile('done');
             }
         }
@@ -44,6 +54,7 @@ class Upload extends React.Component {
     }
 
     inputSelectFile = (event) => {
+        
         if(event) {
             return this.props.selectFile(event);
         }
@@ -53,8 +64,13 @@ class Upload extends React.Component {
 
     //stolen from - https://stackoverflow.com/questions/55464274/react-input-type-file-semantic-ui-react
     fileInputRef = React.createRef();
+    chooseFileFunction = () => {
+        console.log('choose file fired...');
+        this.props.uploadingFile(false);
+    }
 
     renderUpload = () => {
+
         return (
             <React.Fragment>
                 <Header as='h2'>Upload File</Header>
@@ -63,18 +79,25 @@ class Upload extends React.Component {
                         display: 
                             this.props.isUploading === true ? 'none' : 
                             this.props.isUploading === 'done' ? 'block' : 'none'}}>
-                        {this.props.selectedFile ? this.props.selectedFile.name : 'No file selected.'} has been uploaded.
+                            
+                        {this.props.selectedFile !== null ? `${this.props.selectedFile.name} has been uploaded.` : 'No file selected.'}
                     </div>
                     <Form.Field>
                         <Button
+                            
                             content= {
-                                this.props.selectedFile.name ? 
-                                this.props.selectedFile.name : 
-                                this.props.isUploading === 'done' ? 'Choose File' : 'Choose File'}
+                                this.props.isUploading === 'done' ? 'Choose File' :
+                                this.props.selectedFile === null ? 'Choose File' : 
+                                this.props.isUploading === false && this.props.selectedFile.name === false ? 'Choose File' :
+                                this.props.selectedFile.name ? this.props.selectedFile.name : 'Choose File'
+                            }
+                                
                             labelPosition="left"
                             icon="file"
-                            onClick={() => this.fileInputRef.current.click()}
-                            //debug this logic right here...
+                            onClick={() => {
+                                this.chooseFileFunction();
+                                this.fileInputRef.current.click();
+                            }}
                             loading={this.props.isUploading === true ? true : false}
                         />
                         <input
@@ -91,27 +114,44 @@ class Upload extends React.Component {
         )
     }
 
-    handleChange = (element) => {
-        //document.getElementById("demo");
-        console.log(element);
-        element.checked ? element.checked = true : element.checked = false;
+    handleChange = (element, path) => {
+        if(element) {
+            if(element.checked) {
+                //push element path to state if checkmarked
+                this.setState({
+                    filesToDelete: [...this.state.filesToDelete, path]
+                })
+                return element.checked = true;
+            }
+            else {
+                //remove element path from state if uncheckmarked
+                const newList = this.state.filesToDelete.filter(file => file !== path);
+                this.setState({
+                    filesToDelete: newList
+                })
+                return element.checked = false;
+            }
+        }
+        
     }
 
-    deleteFile = async (files) => {
-        console.log('delete clicked');
-        const url = 'https://api.dropboxapi.com/2/files/delete_batch';
+
+    deleteFile = async () => {
+        const url = '/api/deletefiles';
         
-        /* working on this...
         const response = await axios({
             method: 'POST',
             url: url,
-            responseType: 'arraybuffer',
+            responseType: 'application/json',
             headers: {
-                'Accept': 'application/octet-stream'
-            }
+                'Content-Type': 'application/json'
+            },
+            data: this.state.filesToDelete
         })
-        console.log(response.data);
-        */
+        if(response.data) {
+            console.log('deleted file response: ', response.data);
+            this.props.fetchList();
+        }
     }
 
     renderDeleteList = () => {
@@ -121,14 +161,14 @@ class Upload extends React.Component {
                     <Header as='h2'>Delete File(s)</Header>
                     <Form>
                         {this.props.mediaList.entries.map((listItem) => {
-                            const element = document.getElementById(listItem.name);
+                            const element = document.getElementById(listItem.path_lower);
                             return (
                                 <div key={listItem.id} style={{marginBottom: '6px'}}>
                                     <Form.Checkbox
-                                        id={listItem.name}
+                                        id={listItem.path_lower}
                                         inline
                                         label={listItem.name}
-                                        onChange={() => this.handleChange(element)}
+                                        onChange={() => this.handleChange(element, listItem.path_lower)}
                                     />
                                 </div>
                             )
@@ -141,11 +181,11 @@ class Upload extends React.Component {
     
 
     render() {
-        console.log(this.props.mediaList.entries);
+        console.log(this.props);
         return (
             <React.Fragment>
                 <div>
-                    {this.renderUpload() || 'loading...'}
+                    {this.renderUpload()}
                 </div>
                 <div style={{marginTop: '50px', marginBottom: '14px'}}>
                     {this.renderDeleteList() || 'loading...'}
@@ -161,3 +201,6 @@ const mapStateToProps = (state) => {
 }
 
 export default connect(mapStateToProps,{selectFile, uploadingFile, fetchList})(Upload);
+
+
+//fetch list is not firing after delete is completed...
