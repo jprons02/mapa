@@ -12,11 +12,12 @@ class Upload extends React.Component {
     constructor(props) {
         super(props);
         this.state = { 
-            filesToDelete: [] 
+            filesToDelete: [],
+            filesListChange: 0
         };
     }
     
-    componentDidMount = () => {
+    componentDidMount() {
         socket.on('message', function(data){
             console.log(data);
         })
@@ -25,6 +26,7 @@ class Upload extends React.Component {
         this.props.fetchList();
         this.props.uploadingFile(false);
     }
+    
 
     uploadFile = async () => {
         if(this.props.selectedFile) {
@@ -43,9 +45,10 @@ class Upload extends React.Component {
                 data: formData
             })
             if(response.data) {
-                this.props.fetchList();
                 console.log(response.data);
-                this.props.uploadingFile('done');
+                this.props.uploadingFile(false);
+                this.props.selectFile(null);
+                this.props.fetchList();
             }
         }
         else {
@@ -53,24 +56,14 @@ class Upload extends React.Component {
         }
     }
 
-    inputSelectFile = (event) => {
-        
-        if(event) {
-            return this.props.selectFile(event);
-        }
-        return null;
-        //this.props.selectFile(null);
-    }
-
     //stolen from - https://stackoverflow.com/questions/55464274/react-input-type-file-semantic-ui-react
     fileInputRef = React.createRef();
     chooseFileFunction = () => {
         console.log('choose file fired...');
-        this.props.uploadingFile(false);
+        //this.props.uploadingFile(false);
     }
 
     renderUpload = () => {
-
         return (
             <React.Fragment>
                 <Header as='h2'>Upload File</Header>
@@ -135,7 +128,6 @@ class Upload extends React.Component {
         
     }
 
-
     deleteFile = async () => {
         const url = '/api/deletefiles';
         
@@ -149,7 +141,7 @@ class Upload extends React.Component {
             data: this.state.filesToDelete
         })
         if(response.data) {
-            console.log('deleted file response: ', response.data);
+            console.log(response.data);
             this.props.fetchList();
         }
     }
@@ -181,7 +173,9 @@ class Upload extends React.Component {
     
 
     render() {
-        console.log(this.props);
+        if(this.props.mediaList.entries) {
+            console.log(this.props.mediaList.entries.length);
+        }
         return (
             <React.Fragment>
                 <div>

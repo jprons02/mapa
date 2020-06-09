@@ -6,12 +6,6 @@ how to recreate:
     -error: "WebSocket is already in CLOSING or CLOSED state."
 
 
-Upload.js bug -
-how to recreate:
-    -choose file, click upload
-    -choose another file, cancel and you see the file says it has been uploaded when in fact it has not been.
-
-
 
 Fixed bugs...
 
