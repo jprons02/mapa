@@ -4,10 +4,12 @@ import {Button, Header, Form, Segment, Grid} from 'semantic-ui-react';
 
 class AdminTools extends React.Component {
 
+    /*
     componentDidMount() {
         const user = this.props.isSignedIn.username;
         const signedIn = this.props.isSignedIn.isMatch;
     }
+    */
 
     renderAdminTools = () => {
         return (

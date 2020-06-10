@@ -38,9 +38,14 @@ class MediaList extends React.Component {
             const videoRegex = /((.mp4$)|(.wmv$)|(.mov$))/gmi;
             const audioRegex = /((.mp3$)|(.m4a$)|(.wav$))/gmi;
             const imageRegex = /((.png$)|(.jpg$))/gmi;
+            const logoRegex = /logo/gmi;
+            const zipRegex = /\.zip$/gmi;
             const videoList = [];
             const audioList = [];
             const imageList = [];
+            const logoList = [];
+            const zipList = [];
+
             languageList.map((listItem) => {
                 if(videoRegex.test(listItem.name)) {
                     return videoList.push(listItem);
@@ -51,13 +56,21 @@ class MediaList extends React.Component {
                 else if(imageRegex.test(listItem.name)) {
                     return imageList.push(listItem);
                 }
+                else if(logoRegex.test(listItem.name)) {
+                    return logoList.push(listItem);
+                }
+                else if(zipRegex.test(listItem.name)) {
+                    return zipList.push(listItem);
+                }
                 return null;
             });
 
             return {
                 video: videoList,
                 audio: audioList,
-                image: imageList
+                image: imageList,
+                logo: logoList,
+                zip: zipList
             }
         }
         
@@ -125,9 +138,10 @@ class MediaList extends React.Component {
     renderList = (language) => {
         return (
             <div>
-                {this.renderMediaContent(language, 'video', 'Video')}
-                {this.renderMediaContent(language, 'audio', 'Audio')}
-                {this.renderMediaContent(language, 'image', 'Image')}
+                {this.renderMediaContent(language, 'logo', 'Logos')}
+                {this.renderMediaContent(language, 'zip', 'Web Banners')}
+                {this.renderMediaContent(language, 'video', 'TV Spots')}
+                {this.renderMediaContent(language, 'audio', 'Radio Spots')}
             </div>
         )
     }

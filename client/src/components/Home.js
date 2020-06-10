@@ -4,7 +4,6 @@ import {Header} from 'semantic-ui-react';
 
 class Home extends React.Component {
     render() {
-        console.log(this.props);
         return (
         <Header as='h2'>{
             this.props.isSignedIn.username === 'admin' ? 'Welcome Admin' : 
