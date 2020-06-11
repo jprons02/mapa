@@ -1,5 +1,5 @@
 const axios = require('axios');
-const {dropboxAccessToken} = require('../../config/dev');
+const {dropboxAccessToken} = require('../../config/keys');
 const fs = require('fs');
 const multer = require('multer');
 const upload = multer({dest: 'temp_files_to_upload'});

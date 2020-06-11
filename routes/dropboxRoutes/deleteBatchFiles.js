@@ -1,5 +1,5 @@
 const axios = require('axios');
-const {dropboxAccessToken} = require('../../config/dev')
+const {dropboxAccessToken} = require('../../config/keys')
 
 module.exports = app => {
     app.post('/api/deletefiles', async (req, res) => {
