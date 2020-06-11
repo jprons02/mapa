@@ -10,9 +10,11 @@ const listFolder = require('./listFolder');
 const testingdropbox = require('./testingdropboxUpload');
 const deleteBatchFiles = require('./deleteBatchFiles');
 
-module.exports = (app, io) => {
+//module.exports = (app, io) => {
+module.exports = (app) => {
     downloadFile(app);
-    uploadFile(app, io);
+    //uploadFile(app, io);
+    uploadFile(app);
     listFolder(app);
     testingdropbox(app);
     deleteBatchFiles(app);

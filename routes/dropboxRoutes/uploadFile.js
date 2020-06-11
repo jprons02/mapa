@@ -14,7 +14,8 @@ const dropbox = require('dropbox-v2-api').authenticate({ token: dropboxAccessTok
 //readable stream docs: https://nodejs.org/api/stream.html#stream_readable_streams
 
 
-module.exports = (app, io) => {
+//module.exports = (app, io) => {
+module.exports = (app) => {
     
 
     app.post('/api/testupload/:file/:size', upload.single('myFile'), (req, res) => {
@@ -115,8 +116,8 @@ module.exports = (app, io) => {
 
             function sessionAppend(sessionId, start, end, cb) {
                 //io.sockets needed to send data in real time to client. needed for progress bar.
-                const uploadedPercentage = ((end + 1) / FILE_SIZE) * 100
-                io.sockets.emit('message', uploadedPercentage);
+                //const uploadedPercentage = ((end + 1) / FILE_SIZE) * 100
+                //io.sockets.emit('message', uploadedPercentage);
 
                 dropbox({
                     resource: 'files/upload_session/append',

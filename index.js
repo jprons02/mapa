@@ -26,11 +26,14 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+/*
+//using to show continous data to front end during uploading session.
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 http.listen(4000, () => {
     console.log('listening on *:4000');
 });
+*/
 
 const PORT = process.env.PORT || 5000;
 

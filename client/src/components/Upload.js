@@ -5,7 +5,7 @@ import {selectFile, uploadingFile, fetchList} from '../actions';
 import {Button, Header, Form, List} from 'semantic-ui-react';
 //socket.io for upload progress
 import io from 'socket.io-client';
-const socket = io('http://localhost:4000');
+//const socket = io('http://localhost:4000');
 
 class Upload extends React.Component {
 
@@ -19,10 +19,12 @@ class Upload extends React.Component {
     }
     
     componentDidMount() {
+        /*
         socket.on('message', function(data){
             console.log(data);
         })
         socket.on('disconnect', function(){});
+        */
         
         this.props.fetchList();
         this.props.uploadingFile(false);
