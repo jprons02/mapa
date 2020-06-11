@@ -54,7 +54,8 @@ app.use(passport.session());
 addUserRoute(app);
 loginRoute(app);
 googleOAuthRoute(app);
-dropboxRoutes(app, io);
+//dropboxRoutes(app, io);
+dropboxRoutes(app);
 
 app.use('/admin/tools/testing', (req, res) => {
     res.sendFile(__dirname + '/index.html');
