@@ -16,11 +16,21 @@ const googleOAuthRoute = require('./routes/googleAuthRoutes');
 const dropboxRoutes = require('./routes/dropboxRoutes');
 
 //console.log('keys.mongoURI: ', keys.mongoURI);
-
+/*
 mongoose.connect(keys.mongoURI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 });
+*/
+
+mongoose
+  .connect(process.env.mongoURI || keys.mongoURI, {
+    useNewUrlParser: true,
+    useCreateIndex: true,
+    useUnifiedTopology: true
+  })
+  .then(() => console.log("MongoDB Connected..."))
+  .catch(err => console.log(err));
 
 const app = express();
 //these two lines replace body parser.
