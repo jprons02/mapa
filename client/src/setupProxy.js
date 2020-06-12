@@ -4,7 +4,7 @@ module.exports = app => {
   app.use(
     '/auth/*',
     createProxyMiddleware({
-      target: 'http://localhost:5000',
+      target: 'https://desolate-badlands-28780.herokuapp.com',
       changeOrigin: true
     })
   );
@@ -12,7 +12,7 @@ module.exports = app => {
   app.use(
     '/api*',
     createProxyMiddleware({
-      target: 'http://localhost:5000',
+      target: 'https://desolate-badlands-28780.herokuapp.com',
       changeOrigin: true
     })
   );

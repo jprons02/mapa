@@ -15,6 +15,7 @@ const loginRoute = require('./routes/login');
 const googleOAuthRoute = require('./routes/googleAuthRoutes');
 const dropboxRoutes = require('./routes/dropboxRoutes');
 
+//console.log('keys.mongoURI: ', keys.mongoURI);
 
 mongoose.connect(keys.mongoURI, {
     useNewUrlParser: true,
