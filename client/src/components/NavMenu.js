@@ -23,16 +23,20 @@ class NavMenu extends React.Component {
     }
 
     renderNav = (pages) => {
-        //map over pages object
+        
+        const itemSelect = (path) => {
+            this.props.history.push(path);
+        }
+
         return (
             <Menu fixed='top' inverted>
                 <Menu.Item as={Link} to='/' header>
                     <Image size='mini' src='/micc_logo.png' style={{ marginRight: '1.5em' }} />
                     MAPA
                 </Menu.Item>
-                <Dropdown style={{fontWeight: '700'}} item simple text='Tools'>
+                <Dropdown open={false} closeOnChange={true} style={{fontWeight: '700'}} item simple text='Tools'>
                     <Dropdown.Menu>
-                        {pages.map((page) => <Dropdown.Item style={{color: "black !important"}} key={page[1]} as={Link} to={page[0]}>{page[1]}</Dropdown.Item>)}
+                        {pages.map((page) => <Dropdown.Item key={page[1]} onClick={() => itemSelect(page[0])}>{page[1]}</Dropdown.Item>)}
                     </Dropdown.Menu>
                 </Dropdown>
                 <Menu.Item as='a' name='Logout' onClick={() => this.logout()} header></Menu.Item>
