@@ -72,9 +72,9 @@ class NavMenu extends React.Component {
                     >
                         <Dropdown.Menu style={{display: this.state.isMenuOpen ? 'block' : 'none'}} open={this.state.isMenuOpen}>
                             {pages.map((page) => <Dropdown.Item key={page[1]} onClick={() => itemSelect(page[0])}>{page[1]}</Dropdown.Item>)}
+                            <Dropdown.Item key='Logout' onClick={() => this.logout()}>Logout</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown>
-                    <Menu.Item as='a' name='Logout' onClick={() => this.logout()} header></Menu.Item>
                 </Container>
             </Menu>
         )          
@@ -90,7 +90,7 @@ class NavMenu extends React.Component {
         const allPages = [
             ['/admintools', 'Admin Tools'],
             ['/designtools', 'Design Tools'],
-            ['/media', 'Media']
+            ['/media', 'Media List']
         ];
 
         //setup page object according to user logged in
@@ -102,14 +102,14 @@ class NavMenu extends React.Component {
             case 'design':
                 designPages = [
                     ['/designtools', 'Design Tools'],
-                    ['/media', 'Media']
+                    ['/media', 'Media List']
                     
                 ];
                 return this.renderNav(designPages);
 
             case 'media':
                 mediaPages = [
-                    ['/media', 'Media']
+                    ['/media', 'Media List']
                 ];
                 return this.renderNav(mediaPages);
             default:
