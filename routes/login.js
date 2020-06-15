@@ -5,7 +5,6 @@ const UserAdmin = mongoose.model('UserAdmin');
 //fetch user and test password verification
 module.exports = app => {
     app.post('/api/login', (req, res) => {
-        console.log('api/login req.body', req.body);
         UserAdmin.findOne({username: req.body.username}, (err, user) => {
             if (err) throw err;
             

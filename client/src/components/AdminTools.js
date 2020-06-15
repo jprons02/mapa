@@ -1,6 +1,6 @@
 import React from 'react';
 import {connect} from 'react-redux';
-import {Button, Header, Form, Segment, Grid} from 'semantic-ui-react';
+import {Container, Button, Header, Form, Segment, Grid} from 'semantic-ui-react';
 
 class AdminTools extends React.Component {
 
@@ -47,9 +47,9 @@ class AdminTools extends React.Component {
 
     render() {
         return (
-            <React.Fragment>
+            <Container>
                 {this.renderAdminTools()}
-            </React.Fragment>
+            </Container>
         );
     }
 }

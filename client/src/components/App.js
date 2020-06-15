@@ -9,29 +9,23 @@ import Login from './Login';
 import Home from './Home';
 import MediaList from './MediaList';
 
-import { Container } from 'semantic-ui-react';
-
 
 class App extends React.Component {
 
     render() {
         return (
-            <div>
-                <div className="container">
-                    <BrowserRouter>
-                        <Container>
-                            <NavMenu />
-                            <div style={{paddingTop: "80px"}}>
-                                <Route exact path="/login" component={Login} />
-                                <Route exact path="/admintools" component={AdminTools} />
-                                <Route exact path="/" component={Home} />
-                                <Route exact path="/media" component={MediaList} />
-                                <Route exact path="/designtools" component={DesignTools} />
-                            </div>
-                        </Container>
-                    </BrowserRouter>
-                </div>
-            </div>
+            <React.Fragment>
+                <BrowserRouter>
+                    <NavMenu />
+                    <div style={{paddingTop: "80px"}}>
+                        <Route exact path="/login" component={Login} />
+                        <Route exact path="/admintools" component={AdminTools} />
+                        <Route exact path="/" component={Home} />
+                        <Route exact path="/media" component={MediaList} />
+                        <Route exact path="/designtools" component={DesignTools} />
+                    </div>
+                </BrowserRouter>
+            </React.Fragment>
         )
     }
 }

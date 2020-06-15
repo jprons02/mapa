@@ -2,7 +2,7 @@ import React from 'react';
 import {connect} from 'react-redux';
 import axios from 'axios';
 import {selectFile, uploadingFile, fetchList} from '../actions';
-import {Button, Header, Form, List} from 'semantic-ui-react';
+import {Button, Header, Form} from 'semantic-ui-react';
 //socket.io for upload progress
 //import io from 'socket.io-client';
 //const socket = io('http://localhost:4000');

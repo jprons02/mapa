@@ -1,11 +1,11 @@
 import React from 'react';
 import Upload from './Upload';
 import Delete from './Delete';
-import {Header, List} from 'semantic-ui-react';
+import {Container, Header, List} from 'semantic-ui-react';
 
 const DesignTools = () => {
     return (
-        <React.Fragment>
+        <Container>
             <div style={{paddingBottom: '40px'}}>
                 <Header as='h4'>Instructions</Header>
                 <List bulleted>
@@ -20,7 +20,7 @@ const DesignTools = () => {
             <div style={{marginTop: '50px', marginBottom: '14px'}}>
                 <Delete />
             </div>
-        </React.Fragment>
+        </Container>
     )
 }
 

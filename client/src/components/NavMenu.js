@@ -4,7 +4,7 @@ import {setSignIn} from '../actions'
 import {Link} from 'react-router-dom';
 //needed to give history object in props for componentdidmount history.push
 import {withRouter} from 'react-router-dom';
-import {Dropdown, Image, Menu} from 'semantic-ui-react';
+import {Container, Dropdown, Image, Menu} from 'semantic-ui-react';
 
 class NavMenu extends React.Component {
 
@@ -59,21 +59,23 @@ class NavMenu extends React.Component {
 
         return (
             <Menu fixed='top' inverted>
-                <Menu.Item as={Link} to='/' header>
-                    <Image size='mini' src='/micc_logo.png' style={{ marginRight: '1.5em' }} />
-                    MAPA
-                </Menu.Item>
-                <Dropdown 
-                    onMouseEnter={() => this.setIsShown('enter')}
-                    onMouseLeave={() => this.setIsShown('leave')}
-                    onClick={() => this.setIsShown('clicked')}
-                    open={this.state.isMenuOpen} closeOnChange={true} style={{fontWeight: '700'}} item simple text='Tools'
-                >
-                    <Dropdown.Menu style={{display: this.state.isMenuOpen ? 'block' : 'none'}} open={this.state.isMenuOpen}>
-                        {pages.map((page) => <Dropdown.Item key={page[1]} onClick={() => itemSelect(page[0])}>{page[1]}</Dropdown.Item>)}
-                    </Dropdown.Menu>
-                </Dropdown>
-                <Menu.Item as='a' name='Logout' onClick={() => this.logout()} header></Menu.Item>
+                <Container>
+                    <Menu.Item as={Link} to='/' header>
+                        <Image size='mini' src='/micc_logo.png' style={{ marginRight: '1.5em' }} />
+                        MAPA
+                    </Menu.Item>
+                    <Dropdown 
+                        onMouseEnter={() => this.setIsShown('enter')}
+                        onMouseLeave={() => this.setIsShown('leave')}
+                        onClick={() => this.setIsShown('clicked')}
+                        open={this.state.isMenuOpen} closeOnChange={true} style={{fontWeight: '700'}} item simple text='Tools'
+                    >
+                        <Dropdown.Menu style={{display: this.state.isMenuOpen ? 'block' : 'none'}} open={this.state.isMenuOpen}>
+                            {pages.map((page) => <Dropdown.Item key={page[1]} onClick={() => itemSelect(page[0])}>{page[1]}</Dropdown.Item>)}
+                        </Dropdown.Menu>
+                    </Dropdown>
+                    <Menu.Item as='a' name='Logout' onClick={() => this.logout()} header></Menu.Item>
+                </Container>
             </Menu>
         )          
     }
@@ -118,9 +120,9 @@ class NavMenu extends React.Component {
 
     render() {
         return (
-            <div>
+            <React.Fragment>
                 {this.navLogic()}
-            </div>
+            </React.Fragment>
         )
     }
 }
