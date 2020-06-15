@@ -8,6 +8,14 @@ import {Dropdown, Image, Menu} from 'semantic-ui-react';
 
 class NavMenu extends React.Component {
 
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            isMenuOpen: false
+        }
+    }
+
     componentDidMount() {
         if(!this.props.isSignedIn.isMatch) {
             this.props.history.push('/login');
@@ -22,10 +30,31 @@ class NavMenu extends React.Component {
         this.props.history.push('/login');
     }
 
+    setIsShown = (value) => {
+        if(value === 'enter') {
+            this.setState({
+                isMenuOpen: true
+            })
+        }
+        else if (value === 'leave') {
+            this.setState({
+                isMenuOpen: false
+            })
+        }
+        else if (value === 'clicked') {
+            this.setState({
+                isMenuOpen: !this.state.isMenuOpen
+            })
+        }
+    }
+
     renderNav = (pages) => {
         
         const itemSelect = (path) => {
             this.props.history.push(path);
+            this.setState({
+                isMenuOpen: false
+            })
         }
 
         return (
@@ -34,8 +63,13 @@ class NavMenu extends React.Component {
                     <Image size='mini' src='/micc_logo.png' style={{ marginRight: '1.5em' }} />
                     MAPA
                 </Menu.Item>
-                <Dropdown open={false} closeOnChange={true} style={{fontWeight: '700'}} item simple text='Tools'>
-                    <Dropdown.Menu>
+                <Dropdown 
+                    onMouseEnter={() => this.setIsShown('enter')}
+                    onMouseLeave={() => this.setIsShown('leave')}
+                    onClick={() => this.setIsShown('clicked')}
+                    open={this.state.isMenuOpen} closeOnChange={true} style={{fontWeight: '700'}} item simple text='Tools'
+                >
+                    <Dropdown.Menu style={{display: this.state.isMenuOpen ? 'block' : 'none'}} open={this.state.isMenuOpen}>
                         {pages.map((page) => <Dropdown.Item key={page[1]} onClick={() => itemSelect(page[0])}>{page[1]}</Dropdown.Item>)}
                     </Dropdown.Menu>
                 </Dropdown>
