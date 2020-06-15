@@ -2,9 +2,17 @@ import React from 'react';
 import axios from 'axios';
 import {connect} from 'react-redux';
 import {setSignIn} from '../actions';
-import {Button, Form, Grid, Header, Image, Segment} from 'semantic-ui-react'
+import {Button, Form, Grid, Header, Image, Segment, Message} from 'semantic-ui-react'
 
 class Login extends React.Component {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            hasError: false
+        }
+    }
+
 
     submit = async (e) => {
         e.preventDefault();
@@ -22,7 +30,9 @@ class Login extends React.Component {
         if(this.props.isSignedIn.isMatch) {
             this.props.history.push('/');
         } else {
-            alert("wrong info.");
+            this.setState({
+                hasError: true
+            })
         }
     }
 
@@ -34,7 +44,7 @@ class Login extends React.Component {
                     <Header as='h2' textAlign='center'>
                         <Image style={{width: '38px', margin: 'auto', marginRight: '5px'}} src='/micc_logo.png' />Log-in to your account
                     </Header>
-                    <Form size='large'>
+                    <Form error={this.state.hasError} size='large'>
                         <Segment stacked>
                         <Form.Input 
                             id="username" type="text" name="loginId" 
@@ -44,7 +54,11 @@ class Login extends React.Component {
                             id="password" type="password" name="loginPassword"
                             fluid icon='lock' iconPosition='left' placeholder='Password' 
                         />
-
+                        <Message
+                            style={{textAlign: 'left'}}
+                            error
+                            content='Username or password is incorrect. Please try again.'
+                        />
                         <Button onClick={this.submit} fluid size='large'>
                             Login
                         </Button>
