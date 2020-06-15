@@ -87,7 +87,7 @@ class NavMenu extends React.Component {
         let mediaPages;
         const allPages = [
             ['/admintools', 'Admin Tools'],
-            ['/upload', 'Upload'],
+            ['/designtools', 'Design Tools'],
             ['/media', 'Media']
         ];
 
@@ -99,7 +99,7 @@ class NavMenu extends React.Component {
             
             case 'design':
                 designPages = [
-                    ['/upload', 'Upload'],
+                    ['/designtools', 'Design Tools'],
                     ['/media', 'Media']
                     
                 ];

@@ -4,20 +4,11 @@ import axios from 'axios';
 import {selectFile, uploadingFile, fetchList} from '../actions';
 import {Button, Header, Form, List} from 'semantic-ui-react';
 //socket.io for upload progress
-import io from 'socket.io-client';
+//import io from 'socket.io-client';
 //const socket = io('http://localhost:4000');
 
 class Upload extends React.Component {
 
-    constructor(props) {
-        super(props);
-        this.state = { 
-            filesToDelete: [],
-            filesListChange: 0,
-            isDeleting: false
-        };
-    }
-    
     componentDidMount() {
         /*
         socket.on('message', function(data){
@@ -25,7 +16,6 @@ class Upload extends React.Component {
         })
         socket.on('disconnect', function(){});
         */
-        
         this.props.fetchList();
         this.props.uploadingFile(false);
     }
@@ -102,95 +92,13 @@ class Upload extends React.Component {
         )
     }
 
-    handleChange = (path) => {
-        const element = document.getElementById(path);
-        if(element) {
-            if(element.checked) {
-                //push element path to state if checkmarked
-                this.setState({
-                    filesToDelete: [...this.state.filesToDelete, path]
-                })
-                return element.checked = true;
-            }
-            else {
-                //remove element path from state if uncheckmarked
-                const newList = this.state.filesToDelete.filter(file => file !== path);
-                this.setState({
-                    filesToDelete: newList
-                })
-                return element.checked = false;
-            }
-        }
-        
-    }
-
-    deleteFile = async () => {
-        this.setState({
-            isDeleting: true
-        })
-        const url = '/api/deletefiles';
-        
-        const response = await axios({
-            method: 'POST',
-            url: url,
-            responseType: 'application/json',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            data: this.state.filesToDelete
-        })
-        if(response.data) {
-            this.setState({
-                isDeleting: false
-            })
-            this.props.fetchList();
-        }
-    }
-
-    renderDeleteList = () => {
-        if(this.props.mediaList.entries) {
-            return (
-                <React.Fragment>
-                    <Header as='h2'>Delete File(s)</Header>
-                    <Form>
-                        {this.props.mediaList.entries.map((listItem) => {
-                            //const element = document.getElementById(listItem.path_lower);
-                            return (
-                                <div key={listItem.id} style={{marginBottom: '6px'}}>
-                                    <Form.Checkbox
-                                        id={listItem.path_lower}
-                                        inline
-                                        label={listItem.name}
-                                        onChange={() => this.handleChange(listItem.path_lower)}
-                                    />
-                                </div>
-                            )
-                        })}
-                    </Form>
-                </React.Fragment>
-            )
-        }
-    }
+    
     
 
     render() {
         return (
             <React.Fragment>
-                <div style={{paddingBottom: '40px'}}>
-                    <Header as='h4'>Instructions</Header>
-                    <List bulleted>
-                        <List.Item>To categorize as spanish please prefix file name with "sp_".<br/>Example: "sp_village.mov"</List.Item>
-                        <List.Item>To categorize as logo, please use the word "logo" somewhere in the filename, case insensitive.</List.Item>
-                        <List.Item>To categorize web banner, file must be zip.</List.Item>
-                    </List>
-                </div>
-                <div>
-                    {this.renderUpload()}
-                </div>
-                <div style={{marginTop: '50px', marginBottom: '14px'}}>
-                    {this.renderDeleteList() || 'loading...'}
-                </div>
-                <Button loading={this.state.isDeleting} onClick={this.deleteFile}>Delete</Button>
+                {this.renderUpload()}
             </React.Fragment>
         )
     }
