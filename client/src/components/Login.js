@@ -21,7 +21,7 @@ class Login extends React.Component {
             method: 'POST',
             url: '/api/login',
             data: {
-                username: document.getElementById('username').value,
+                username: document.getElementById('username').value.toLowerCase(),
                 password: document.getElementById('password').value
             }
         })
