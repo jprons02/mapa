@@ -5,16 +5,12 @@ how to recreate:
     -let browser idle, check console
     -error: "WebSocket is already in CLOSING or CLOSED state."
 
-Upload
-how to recreate: 
-    -upload file
-    -delete same file
-    -upload same file again and the file is not selected and can not upload
+
 
 
 Fixed bugs...
 
-upload bug -
+Upload -
 how to recreate:
     -select a file and do not click upload
     -go to select a file again, hit cancel
@@ -26,3 +22,11 @@ how i fixed it -
             //event.target.files.length - if a file is selected it will be length of at least 1
             dispatch({type: SELECTED_FILE, payload: event.target.files.length > 0 ? selectedFile : null});
     }
+
+Upload
+how to recreate: 
+    -upload file
+    -delete same file
+    -upload same file again and the file is not selected and can not upload
+how i fixed it -
+    -i set event.target.value = null in handle change function after calling select file.
