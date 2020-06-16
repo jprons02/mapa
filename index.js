@@ -15,13 +15,6 @@ const loginRoute = require('./routes/login');
 const googleOAuthRoute = require('./routes/googleAuthRoutes');
 const dropboxRoutes = require('./routes/dropboxRoutes');
 
-//console.log('keys.mongoURI: ', keys.mongoURI);
-/*
-mongoose.connect(keys.mongoURI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-});
-*/
 
 mongoose
   .connect(process.env.mongoURI || keys.mongoURI, {
@@ -38,7 +31,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 /*
-//using to show continous data to front end during uploading session.
+//socket.io using to show continous data to front end during uploading session.
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 http.listen(4000, () => {

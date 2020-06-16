@@ -1,13 +1,23 @@
+//Upload a file to dropbox.
+
 import React from 'react';
 import {connect} from 'react-redux';
 import axios from 'axios';
 import {selectFile, uploadingFile, fetchList} from '../actions';
 import {Button, Header, Form} from 'semantic-ui-react';
-//socket.io for upload progress
+//below is socket.io for upload progress
 //import io from 'socket.io-client';
 //const socket = io('http://localhost:4000');
 
 class Upload extends React.Component {
+
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            value: ''
+        }
+    }
 
     componentDidMount() {
         /*
@@ -27,7 +37,7 @@ class Upload extends React.Component {
             //need to use FormData for backend Multer middleware.
             let formData = new FormData();
             formData.append('myFile', this.props.selectedFile);
-            const url = `/api/testupload/${this.props.selectedFile.name}/${this.props.selectedFile.size}`;
+            const url = `/api/upload/${this.props.selectedFile.name}/${this.props.selectedFile.size}`;
             
             const response = await axios({
                 method: 'POST',
@@ -46,6 +56,11 @@ class Upload extends React.Component {
         else {
             alert("Please select a file.");
         }
+    }
+
+    handleChange = (event) => {
+        this.props.selectFile(event);
+        event.target.value = null;
     }
 
     //stolen from - https://stackoverflow.com/questions/55464274/react-input-type-file-semantic-ui-react
@@ -80,9 +95,10 @@ class Upload extends React.Component {
                         />
                         <input
                             ref={this.fileInputRef}
+                            name='uploadFile'
                             type='file'
                             hidden
-                            onChange={this.props.selectFile}
+                            onChange={this.handleChange}
                         />
                     </Form.Field>
                     <Button onClick={this.uploadFile}>Upload</Button>
@@ -96,6 +112,7 @@ class Upload extends React.Component {
     
 
     render() {
+        console.log(this.props);
         return (
             <React.Fragment>
                 {this.renderUpload()}

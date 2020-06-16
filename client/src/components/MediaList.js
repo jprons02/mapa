@@ -1,3 +1,6 @@
+//Fetch and outputs a list of media from dropbox and then sorts it. 
+//Outputted list is intentionally only .zip, audio and video files.
+
 import React from 'react';
 import {connect} from 'react-redux';
 import axios from 'axios';

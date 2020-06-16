@@ -1,3 +1,5 @@
+//Proxy needed for double server set up in local development only.
+
 const { createProxyMiddleware } = require('http-proxy-middleware');
 
 module.exports = app => {

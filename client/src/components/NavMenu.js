@@ -1,8 +1,13 @@
+//IMPORTANT 
+//This component holds the front-end authentication functionality within componentDidMount().
+//And needs to always render throughout the project to keep front-end authentication working correctly and securely.
+//Without it, anyone can type in directly domain/admintools and go straight to the page without logging in.
+
 import React from 'react';
 import {connect} from 'react-redux';
 import {setSignIn} from '../actions'
 import {Link} from 'react-router-dom';
-//needed to give history object in props for componentdidmount history.push
+//withrouter is needed to give history object in props for componentdidmount history.push
 import {withRouter} from 'react-router-dom';
 import {Container, Dropdown, Image, Menu} from 'semantic-ui-react';
 

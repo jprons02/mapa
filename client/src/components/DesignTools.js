@@ -1,3 +1,5 @@
+//Lists tools available to design team.
+
 import React from 'react';
 import Upload from './Upload';
 import Delete from './Delete';

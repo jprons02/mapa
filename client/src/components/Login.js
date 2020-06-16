@@ -1,3 +1,5 @@
+//Login screen. If user is not logged in, they will be directed always to this component.
+
 import React from 'react';
 import axios from 'axios';
 import {connect} from 'react-redux';
@@ -37,7 +39,6 @@ class Login extends React.Component {
     }
 
     renderLogin = () => {
-        //micc_logo.png
         return (
             <Grid textAlign='center' style={{ height: '100vh' }} verticalAlign='middle'>
                 <Grid.Column style={{ maxWidth: 450 }}>

@@ -1,15 +1,10 @@
+//Lists tools available to admin.
+
 import React from 'react';
 import {connect} from 'react-redux';
 import {Container, Button, Header, Form, Segment, Grid} from 'semantic-ui-react';
 
 class AdminTools extends React.Component {
-
-    /*
-    componentDidMount() {
-        const user = this.props.isSignedIn.username;
-        const signedIn = this.props.isSignedIn.isMatch;
-    }
-    */
 
     renderAdminTools = () => {
         return (

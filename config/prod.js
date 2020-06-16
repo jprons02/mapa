@@ -1,4 +1,5 @@
 //prod.js = production keys here
+//These keys are all stored as environment variables within heroku
 
 module.exports = {
     adminID: process.env.adminID,

@@ -5,6 +5,11 @@ how to recreate:
     -let browser idle, check console
     -error: "WebSocket is already in CLOSING or CLOSED state."
 
+Upload
+how to recreate: 
+    -upload file
+    -delete same file
+    -upload same file again and the file is not selected and can not upload
 
 
 Fixed bugs...

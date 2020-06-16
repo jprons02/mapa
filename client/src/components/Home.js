@@ -1,3 +1,5 @@
+//Home page, what user sees once logged in.
+
 import React from 'react';
 import {connect} from 'react-redux';
 import {Container, Header} from 'semantic-ui-react';
