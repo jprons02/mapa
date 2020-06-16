@@ -1,5 +1,6 @@
 //Fetch and outputs a list of media from dropbox and then sorts it. 
 //Outputted list is intentionally only .zip, audio and video files.
+//Download on click.
 
 import React from 'react';
 import {connect} from 'react-redux';
@@ -118,8 +119,8 @@ class MediaList extends React.Component {
                             <List.Item style={{marginBottom: '4px'}} key={listItem.id}>
                                 <List.Icon name='download' />
                                 <List.Content>
-                                    <List.Header onClick={() => this.downloadFile(`/api/download${listItem.path_lower}`, listItem.name)}  as='a'>{listItem.name}</List.Header>
-                                    <List.Description>
+                                    <List.Item onClick={() => this.downloadFile(`/api/download${listItem.path_lower}`, listItem.name)}  as='a'>{listItem.name}</List.Item>
+                                    <List.Description style={{paddingTop: '3px'}}>
                                         {Math.ceil(listItem.size / 1000000) < 1000 ? 
                                             (listItem.size / 1000000).toFixed(2) + 'MB' : 
                                             (listItem.size / 1000000000).toFixed(2) + 'GB'}
