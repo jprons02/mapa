@@ -3,6 +3,7 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import {Container, Button, Header, Form, Segment, Grid} from 'semantic-ui-react';
+import ChangeJackpotNumber from './ChangeJackpotNumber';
 
 class AdminTools extends React.Component {
 
@@ -44,6 +45,9 @@ class AdminTools extends React.Component {
         return (
             <Container>
                 {this.renderAdminTools()}
+                <div>
+                    <ChangeJackpotNumber />
+                </div>
             </Container>
         );
     }

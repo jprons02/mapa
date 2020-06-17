@@ -107,6 +107,3 @@ const mapStateToProps = (state) => {
 }
 
 export default connect(mapStateToProps,{fetchList})(Delete);
-
-
-//add spinner to delete button until file is gone...

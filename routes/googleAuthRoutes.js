@@ -8,7 +8,7 @@ module.exports = app => {
         passport.authenticate('google', { failureRedirect: '/failed' }),
         function(req, res) {
             // Successful authentication, redirect home.
-            res.redirect('/');
+            res.redirect('http://localhost:3000/');
     });
     /*
     //use this if you want to gather user data.
