@@ -7,8 +7,8 @@ const {WP_CONSUMER_SECRET} = require('../config/keys')
 module.exports = app => {
 
     //post number from front end to file, jackpotNumber.txt
-    app.post('/api/tribe/jackpotnumber', async (req, res) => {
-        console.log('tribe wordpress api POST...');
+    app.post('/api/jackpotnumber', async (req, res) => {
+        console.log('wordpress api POST...');
         //req.body.number is a string
         console.log(req.body.number);
         
@@ -21,8 +21,8 @@ module.exports = app => {
     });
 
     //get number from file, jackpotNumber.txt and return it to wordpress shortcode callback function
-    app.get('/api/tribe/jackpot', (req, res) => {
-        console.log('tribe wordpress api GET...');
+    app.get('/api/jackpot', (req, res) => {
+        console.log('wordpress api GET...');
 
         const content = fs.readFileSync('jackpotNumber.txt', 'utf8');
         console.log(content);

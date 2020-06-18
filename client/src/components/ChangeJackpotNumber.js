@@ -1,6 +1,6 @@
 import React from 'react';
 import axios from 'axios';
-import {Button, Header, Form} from 'semantic-ui-react';
+import {Button, Header, Form, Message} from 'semantic-ui-react';
 
 class ChangeJackPotNumber extends React.Component {
 
@@ -8,14 +8,15 @@ class ChangeJackPotNumber extends React.Component {
         super(props);
         this.state = {
             value: '',
-            isWorking: false
+            isWorking: false,
+            isSubmit: false
         };
     }
     
 
     changeNumber = async () => {
         //is the number a string?
-        const url = '/api/tribe/jackpotnumber/';
+        const url = '/api/jackpotnumber/';
         const data = {
             number: this.state.value
         }
@@ -28,6 +29,9 @@ class ChangeJackPotNumber extends React.Component {
             })
             if(response.data) {
                 console.log(response.data);
+                this.setState({
+                    isSubmit: true
+                })
             }
         }
         catch(error){
@@ -37,15 +41,21 @@ class ChangeJackPotNumber extends React.Component {
 
     handleChange = (event) => {
         this.setState({value: event.target.value});
+        this.setState({isSubmit: false})
     }
     
 
     render() {
-        console.log(this.state.value);
         return (
             <React.Fragment>
-                <Form >
-                    <Form.Input onChange={this.handleChange} value={this.state.value} />
+                <Header as='h2'>Jackpot Number</Header>
+                <Form className={this.state.isSubmit ? 'success' : ''}>
+                    <Form.Input width={4} onChange={this.handleChange} value={this.state.value} />
+                    <Message
+                        success
+                        header='Jackpot Number updated'
+                        content={`${this.state.value} has been set.`}
+                    />
                     <Button style={{marginTop: '14px'}} loading={this.state.isWorking} onClick={this.changeNumber}>Submit</Button>
                 </Form>
             </React.Fragment>
