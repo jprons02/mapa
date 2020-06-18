@@ -9,32 +9,24 @@ module.exports = app => {
     //post number from front end to file, jackpotNumber.txt
     app.post('/api/tribe/jackpotnumber', async (req, res) => {
         console.log('tribe wordpress api POST...');
-        console.log(req.body);
+        //req.body.number is a string
+        console.log(req.body.number);
         
-        const data = JSON.stringify(req.body);
-        
-        fs.writeFile('jackpotNumber.json', data, function (err) {
+        fs.writeFile('jackpotNumber.txt', req.body.number, function (err) {
             if (err) throw err;
             console.log('It\'s saved!');
             res.send('jackpot number stored!')
         });
-
+        
     });
 
     //get number from file, jackpotNumber.txt and return it to wordpress shortcode callback function
-    app.get('/api/tribe/jackpot', async (req, res) => {
+    app.get('/api/tribe/jackpot', (req, res) => {
         console.log('tribe wordpress api GET...');
 
-        try {
-            fs.readFile('jackpotNumber.json', function(err, data) {
-                if (err) throw err;
-                console.log(data);
-                res.send(data);
-            });
-        }
-        catch(error) {
-            res.send(error)
-        }
+        const content = fs.readFileSync('jackpotNumber.txt', 'utf8');
+        console.log(content);
+        res.send(content);
     });
 
 }
