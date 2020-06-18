@@ -15,22 +15,20 @@ class ChangeJackPotNumber extends React.Component {
 
     changeNumber = async () => {
         //is the number a string?
-        const url = `/api/tribe/jackpot/${this.state.value}`;
+        const url = `/api/tribe/jackpotnumber/`;
+        
         try {
             const response = await axios({
                 method: 'POST',
                 url: url,
-                responseType: 'application/json',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
+                data: {number: this.state.value}
             })
             if(response.data) {
                 console.log(response.data);
             }
         }
         catch(error){
-            console.log(error.response.data);
+            console.log(error);
         }
     }
 
