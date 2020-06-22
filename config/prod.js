@@ -14,5 +14,7 @@ module.exports = {
     cookieKey: process.env.cookieKey,
     dropboxKey: process.env.dropboxKey,
     dropboxSecret: process.env.dropboxSecret,
-    dropboxAccessToken: process.env.dropboxAccessToken
+    dropboxAccessToken: process.env.dropboxAccessToken,
+    WP_CONSUMER_KEY: process.env.WP_CONSUMER_KEY,
+    WP_CONSUMER_SECRET: process.env.WP_CONSUMER_SECRET
 }

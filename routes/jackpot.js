@@ -6,6 +6,43 @@ const {WP_CONSUMER_SECRET} = require('../config/keys')
 
 module.exports = app => {
 
+    //list contents of specified folder
+    app.get('/api/jackpotnumber', async (req, res, next) => {
+        //req.body.number is a string
+        console.log(req.body.number);
+
+        const tribeURL = 'https://tribe.miccosukee.com/wp-json/api/jackpotnumber';
+        
+        try {
+            const response = await axios ({
+                method: 'POST',
+                url: tribeURL,
+                data: req.body.number, 
+                headers: {
+                    'Content-Type': 'text/plain'
+                },
+                auth: {
+                    username: WP_CONSUMER_KEY,
+                    password: WP_CONSUMER_SECRET
+                }
+            })
+            res.send(response.data);
+        }
+        
+        catch(error) {
+            res.send(error);
+        }
+    })
+
+
+}
+
+
+
+
+
+
+    /*
     //post number from front end to file, jackpotNumber.txt
     app.post('/api/jackpotnumber', async (req, res) => {
         console.log('wordpress api POST...');
@@ -28,5 +65,5 @@ module.exports = app => {
         console.log(content);
         res.send(content);
     });
+    */
 
-}
