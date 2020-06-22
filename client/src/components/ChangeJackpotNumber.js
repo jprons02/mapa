@@ -9,15 +9,22 @@ class ChangeJackPotNumber extends React.Component {
         this.state = {
             value: '',
             isSubmit: false,
-            showInvalidError: false
+            showInvalidError: false,
+            isLoading: false
         };
     }
     
 
     changeNumber = async () => {
+        this.setState({
+            isLoading: true
+        })
         //validate number
         if(!this.validateNumber()) {
             this.setState({showInvalidError: true})
+            this.setState({
+                isLoading: false
+            })
         }
         else {
             const url = '/api/jackpotnumber';
@@ -35,6 +42,9 @@ class ChangeJackPotNumber extends React.Component {
                     console.log(response.data);
                     this.setState({
                         isSubmit: true
+                    })
+                    this.setState({
+                        isLoading: false
                     })
                 }
             }
@@ -86,7 +96,7 @@ class ChangeJackPotNumber extends React.Component {
                         header='Please type in a valid number.'
                         content='Do not use " , " or " $ " in the number.'
                     />
-                    <Button onClick={this.changeNumber}>Submit</Button>
+                    <Button loading={this.state.isLoading} onClick={this.changeNumber}>Submit</Button>
                 </Form>
             </React.Fragment>
         )

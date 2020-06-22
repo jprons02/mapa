@@ -11,12 +11,17 @@ module.exports = app => {
         //req.body.number is a string
         console.log(req.body.number);
 
-        const tribeURL = 'https://tribe.miccosukee.com/wp-json/api/jackpotnumber';
+        let hubResponse = 0;
+        let mrgResponse = 0;
+
+        const hubURL = 'https://miccosukee.com/wp-json/api/jackpotnumber';
+        const mrgURL = 'https://mrg.miccosukee.com/wp-json/api/jackpotnumber';
+        
         
         try {
             const response = await axios ({
                 method: 'POST',
-                url: tribeURL,
+                url: hubURL,
                 data: req.body.number, 
                 headers: {
                     'Content-Type': 'text/plain'
@@ -26,12 +31,44 @@ module.exports = app => {
                     password: WP_CONSUMER_SECRET
                 }
             })
-            res.send(response.data);
+            if(response.data) {
+                hubResponse = 1;
+            }
         }
         
         catch(error) {
             res.send(error);
         }
+
+
+        try {
+            const response = await axios ({
+                method: 'POST',
+                url: mrgURL,
+                data: req.body.number, 
+                headers: {
+                    'Content-Type': 'text/plain'
+                },
+                auth: {
+                    username: WP_CONSUMER_KEY,
+                    password: WP_CONSUMER_SECRET
+                }
+            })
+            if(response.data) {
+                mrgResponse = 1;
+            }
+        }
+        
+        catch(error) {
+            res.send(error);
+        }
+
+        if(hubResponse === 1 && mrgResponse === 1){
+            res.send('OK');
+        } else {
+            res.send('ERROR');
+        }
+
     })
 
 
