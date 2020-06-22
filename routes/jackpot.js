@@ -1,13 +1,13 @@
 //https://tribe.miccosukee.com/wp-json/api/numberCount
 const fs = require('fs');
 const axios = require('axios');
-const {WP_CONSUMER_KEY} = require('../config/keys')
-const {WP_CONSUMER_SECRET} = require('../config/keys')
+const {WP_CONSUMER_KEY} = require('../config/keys');
+const {WP_CONSUMER_SECRET} = require('../config/keys');
 
 module.exports = app => {
 
     //list contents of specified folder
-    app.get('/api/jackpotnumber', async (req, res, next) => {
+    app.post('/api/jackpotnumber', async (req, res, next) => {
         //req.body.number is a string
         console.log(req.body.number);
 

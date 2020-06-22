@@ -20,7 +20,7 @@ class ChangeJackPotNumber extends React.Component {
             this.setState({showInvalidError: true})
         }
         else {
-            const url = '/api/jackpotnumber/';
+            const url = '/api/jackpotnumber';
             const data = {
                 number: this.state.value
             }
