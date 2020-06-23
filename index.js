@@ -14,7 +14,8 @@ const addUserRoute = require('./routes/addUser');
 const loginRoute = require('./routes/login');
 const googleOAuthRoute = require('./routes/googleAuthRoutes');
 const dropboxRoutes = require('./routes/dropboxRoutes');
-const jackpotRoute = require('./routes/jackpot');
+const setJackpotRoute = require('./routes/setJackpot');
+const getJackpotRoute = require('./routes/getJackpotNumber');
 
 
 mongoose
@@ -61,7 +62,8 @@ loginRoute(app);
 googleOAuthRoute(app);
 //dropboxRoutes(app, io);
 dropboxRoutes(app);
-jackpotRoute(app);
+setJackpotRoute(app);
+getJackpotRoute(app);
 
 app.use('/admin/tools/backend', (req, res) => {
     res.sendFile(__dirname + '/index.html');

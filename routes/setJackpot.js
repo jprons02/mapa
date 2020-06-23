@@ -1,5 +1,6 @@
-//https://tribe.miccosukee.com/wp-json/api/numberCount
-const fs = require('fs');
+//This route sets the jackpot number in wordpress database.
+//It sends the post data to wordpress custom endpoint (found in the respective website child theme functions.php file)
+
 const axios = require('axios');
 const {WP_CONSUMER_KEY} = require('../config/keys');
 const {WP_CONSUMER_SECRET} = require('../config/keys');

@@ -1,6 +1,9 @@
 import React from 'react';
+import {connect} from 'react-redux';
+import {getCurrentJackpotNumber} from '../actions';
 import axios from 'axios';
 import {Button, Header, Form, Message} from 'semantic-ui-react';
+
 
 class ChangeJackPotNumber extends React.Component {
 
@@ -10,72 +13,134 @@ class ChangeJackPotNumber extends React.Component {
             value: '',
             isSubmit: false,
             showInvalidError: false,
-            isLoading: false
+            setNumberIsLoading: false,
+            getNumberIsLoading: false,
+            currentJackpotNumber: '',
+            addToCurrent: ''
         };
     }
-    
 
-    changeNumber = async () => {
-        this.setState({
-            isLoading: true
-        })
-        //validate number
-        if(!this.validateNumber()) {
-            this.setState({showInvalidError: true})
-            this.setState({
-                isLoading: false
+    componentDidMount = () => {
+        this.props.getCurrentJackpotNumber();
+    }
+    
+    /*
+    getJackpotNumber = async () => {
+        const getURL = '/api/getjackpotnumber';
+        try {
+            const response = await axios({
+                method: 'GET',
+                url: getURL
             })
+            if(response.data) {
+                console.log(response.data);
+                this.props.getJackpotNumber(response.data);
+            }
         }
-        else {
-            const url = '/api/jackpotnumber';
-            const data = {
-                number: this.state.value
-            }
-            
-            try {
-                const response = await axios({
-                    method: 'POST',
-                    url: url,
-                    data: data
-                })
-                if(response.data) {
-                    console.log(response.data);
-                    this.setState({
-                        isSubmit: true
-                    })
-                    this.setState({
-                        isLoading: false
-                    })
-                }
-            }
-            catch(error){
-                console.log(error);
-            }
+        catch(error){
+            console.log(error);
+            return false;
         }
     }
+    */
 
-    validateNumber = () => {
-        if(this.state.value) {
-            const value = parseInt(this.state.value);
-            //reason: doing nan test, 100abcd is still passing. so 100 == '100abcd' will result in false in javascript.
-            if(value == this.state.value) {
-                //not valid
-                if (isNaN(value)) {
+
+    changeNumber = async () => {
+        this.setState({setNumberIsLoading: true})
+        
+        console.log('number submitted.');
+        
+        const setURL = '/api/jackpotnumber';
+        const data = {
+            number: this.state.value
+        }
+        
+        try {
+            const response = await axios({
+                method: 'POST',
+                url: setURL,
+                data: data
+            })
+            if(response.data === 'OK') {
+                console.log(response.data);
+                this.setState({
+                    setNumberIsLoading: false,
+                    isSubmit: true
+                })
+            } else {
+                alert('error, call admin');
+            }
+        }
+        catch(error){
+            console.log(error);
+        }
+            
+        
+    }
+
+    
+    validateNumber = (number) => {
+        if(number === '') {
+            return true;
+        } else if (parseInt(number) === 0) {
+            return false;
+        }
+        else {
+            const numberInt = parseInt(number);
+            if(number == numberInt) {
+                if(isNaN(numberInt)) {
                     return false
-                //valid
-                } else {
+                }
+                else {
                     return true
                 }
             }
         }
-        return false  
+        
     }
 
     handleChange = (event) => {
-        this.setState({value: event.target.value});
-        this.setState({isSubmit: false});
-        this.setState({showInvalidError: false});
+        this.setState({
+            isSubmit: false,
+            showInvalidError: false
+        })
+        if(this.validateNumber(event.target.value)) {
+            this.setState({value: event.target.value})
+        } else {
+            this.setState({showInvalidError: true})
+        }
     }
+
+    handleAddChange = (event) => {
+        this.setState({
+            showInvalidError: false,
+            isSubmit: false
+        })
+        //need to figure out how to delete... and show ''.
+        if(this.validateNumber(event.target.value)) {
+            this.setState({
+                addToCurrent: event.target.value
+            })
+
+            this.calculateTotal(event.target.value);
+        } else {
+            this.setState({showInvalidError: true})
+        }
+    }
+
+    calculateTotal = (amount) => {
+        console.log('calculate total fired...');
+        if(parseInt(this.props.currentJackpotNumber) > 1) {
+            const currentNumber = parseInt(this.props.currentJackpotNumber);
+            const amountToAdd = amount === '' ? 0 : parseInt(amount);
+            const valueToSubmit = currentNumber + amountToAdd;
+
+            this.setState({value: valueToSubmit.toString()})
+        }
+    }
+
+
+    
 
 
     render() {
@@ -85,10 +150,12 @@ class ChangeJackPotNumber extends React.Component {
             <React.Fragment>
                 <Header as='h2'>Jackpot Number</Header>
                 <Form className={successOrError}>
-                    <Form.Input width={4} onChange={this.handleChange} value={this.state.value} placeholder='Enter number here'/>
+                    <Form.Input label='Current jackpot' value={this.props.currentJackpotNumber}/>
+                    <Form.Input label='Amount to add' onChange={this.handleAddChange} value={this.state.addToCurrent}/>
+                    <Form.Input label='New jackpot number' onChange={this.handleChange} value={this.state.value}/>
                     <Message
                         success
-                        header='Jackpot Number updated'
+                        header='Jackpot number updated'
                         content={`${this.state.value} has been set.`}
                     />
                     <Message
@@ -96,12 +163,15 @@ class ChangeJackPotNumber extends React.Component {
                         header='Please type in a valid number.'
                         content='Do not use " , " or " $ " in the number.'
                     />
-                    <Button loading={this.state.isLoading} onClick={this.changeNumber}>Submit</Button>
+                    <Button loading={this.state.setNumberIsLoading} onClick={this.changeNumber}>Submit</Button>
                 </Form>
             </React.Fragment>
         )
     }
 }
 
+const mapStateToProps = (state) => {
+    return state;
+}
 
-export default (ChangeJackPotNumber);
+export default connect(mapStateToProps,{getCurrentJackpotNumber})(ChangeJackPotNumber);

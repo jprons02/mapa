@@ -4,11 +4,19 @@ import {SELECTED_FILE} from './types';
 import {SIGN_IN} from './types';
 import {DOWNLOADING_FILE} from './types';
 import {UPLOADING_FILE} from './types';
+import {CURRENT_JACKPOT_NUMBER} from './types';
 
 export const fetchList = () => async dispatch => {
     const res = await axios.get('/api/list-content/media');
     
     dispatch({type: FETCH_LIST, payload: res.data});
+}
+
+
+export const getCurrentJackpotNumber = () => async dispatch => {
+    const res = await axios.get('/api/getjackpotnumber');
+    
+    dispatch({type: CURRENT_JACKPOT_NUMBER, payload: res.data});
 }
 
 
