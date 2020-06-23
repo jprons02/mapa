@@ -67,6 +67,7 @@ class ChangeJackPotNumber extends React.Component {
                     setNumberIsLoading: false,
                     isSubmit: true
                 })
+                this.props.getCurrentJackpotNumber();
             } else {
                 alert('error, call admin');
             }
