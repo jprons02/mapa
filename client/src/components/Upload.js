@@ -15,10 +15,9 @@ class Upload extends React.Component {
         super(props);
 
         this.state = {
-            value: '',
+            valueUpload: '',
             isUploading: false,
-            showInvalidError: false,
-            showSuccessMessage: false,
+            showInvalidErrorUpload: false,
             fileUploaded: false
         }
     }
@@ -63,7 +62,7 @@ class Upload extends React.Component {
             }
         }
         else {
-            this.setState({showInvalidError: true})
+            this.setState({showInvalidErrorUpload: true})
         }
     }
 
@@ -76,12 +75,12 @@ class Upload extends React.Component {
     fileInputRef = React.createRef();
 
     renderUpload = () => {
-        const successOrError = this.state.fileUploaded ? 'success' : this.state.showInvalidError ? 'error' : '';
+        const successOrErrorUpload = this.state.fileUploaded ? 'success' : this.state.showInvalidErrorUpload ? 'error' : '';
 
         return (
             <React.Fragment>
                 <Header as='h2'>Upload File</Header>
-                <Form className={successOrError} style={{marginTop: '30px'}}>
+                <Form className={successOrErrorUpload} style={{marginTop: '30px'}}>
                     <Form.Field>
                         <Button
                             content= {

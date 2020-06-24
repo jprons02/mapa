@@ -67,8 +67,11 @@ class ChangeJackPotNumber extends React.Component {
             return false;
         }
         else {
+            //if you pareInt a non number you get NaN
+            //need to keep == in stead of === so you can compare string number to int number.
+            //if you parseInt(123aaa) you will get 123.
             const numberInt = parseInt(number);
-            if(number === numberInt) {
+            if(number == numberInt) {
                 if(isNaN(numberInt)) {
                     return false
                 }
@@ -76,6 +79,7 @@ class ChangeJackPotNumber extends React.Component {
                     return true
                 }
             }
+            
         }
         
     }
@@ -93,11 +97,12 @@ class ChangeJackPotNumber extends React.Component {
     }
 
     handleAddChange = (event) => {
+        console.log(event.target.value);
         this.setState({
-            showInvalidError: false,
-            isSubmit: false
+            isSubmit: false,
+            showInvalidError: false
         })
-        //need to figure out how to delete... and show ''.
+        
         if(this.validateNumber(event.target.value)) {
             this.setState({
                 addToCurrent: event.target.value
@@ -107,6 +112,7 @@ class ChangeJackPotNumber extends React.Component {
         } else {
             this.setState({showInvalidError: true})
         }
+        
     }
 
     calculateTotal = (amount) => {
