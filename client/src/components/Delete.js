@@ -2,7 +2,7 @@ import React from 'react';
 import {connect} from 'react-redux';
 import axios from 'axios';
 import {fetchList} from '../actions';
-import {Button, Header, Form} from 'semantic-ui-react';
+import {Button, Header, Form, Segment} from 'semantic-ui-react';
 
 class Delete extends React.Component {
 
@@ -68,22 +68,22 @@ class Delete extends React.Component {
         if(this.props.mediaList.entries) {
             return (
                 <React.Fragment>
-                    <Header as='h2'>Delete File(s)</Header>
-                    <Form>
-                        {this.props.mediaList.entries.map((listItem) => {
-                            //const element = document.getElementById(listItem.path_lower);
-                            return (
-                                <div key={listItem.id} style={{marginBottom: '6px'}}>
-                                    <Form.Checkbox
-                                        id={listItem.path_lower}
-                                        inline
-                                        label={listItem.name}
-                                        onChange={() => this.handleChange(listItem.path_lower)}
-                                    />
-                                </div>
-                            )
-                        })}
-                    </Form>
+                        <Header as='h2'>Delete File(s)</Header>
+                        <Form>
+                            {this.props.mediaList.entries.map((listItem) => {
+                                //const element = document.getElementById(listItem.path_lower);
+                                return (
+                                    <div key={listItem.id} style={{marginBottom: '6px'}}>
+                                        <Form.Checkbox
+                                            id={listItem.path_lower}
+                                            inline
+                                            label={listItem.name}
+                                            onChange={() => this.handleChange(listItem.path_lower)}
+                                        />
+                                    </div>
+                                )
+                            })}
+                        </Form>
                 </React.Fragment>
             )
         }
@@ -93,10 +93,11 @@ class Delete extends React.Component {
     render() {
         return (
             <React.Fragment>
-                <div>
+                <Button onClick={()=>this.props.history.goBack()} labelPosition='left' icon='left chevron' content='Back' />
+                <Segment style={{padding: '20px 14px 40px 14px'}} raised>
                     {this.renderDeleteList() || 'loading...'}
-                </div>
                 <Button style={{marginTop: '14px'}} loading={this.state.isDeleting} onClick={this.deleteFile}>Delete</Button>
+                </Segment>
             </React.Fragment>
         )
     }

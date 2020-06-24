@@ -2,7 +2,7 @@ import React from 'react';
 import {connect} from 'react-redux';
 import {getCurrentJackpotNumber} from '../actions';
 import axios from 'axios';
-import {Button, Header, Form, Message} from 'semantic-ui-react';
+import {Button, Header, Form, Message, Segment} from 'semantic-ui-react';
 
 
 class ChangeJackPotNumber extends React.Component {
@@ -23,26 +23,6 @@ class ChangeJackPotNumber extends React.Component {
     componentDidMount = () => {
         this.props.getCurrentJackpotNumber();
     }
-    
-    /*
-    getJackpotNumber = async () => {
-        const getURL = '/api/getjackpotnumber';
-        try {
-            const response = await axios({
-                method: 'GET',
-                url: getURL
-            })
-            if(response.data) {
-                console.log(response.data);
-                this.props.getJackpotNumber(response.data);
-            }
-        }
-        catch(error){
-            console.log(error);
-            return false;
-        }
-    }
-    */
 
 
     changeNumber = async () => {
@@ -88,7 +68,7 @@ class ChangeJackPotNumber extends React.Component {
         }
         else {
             const numberInt = parseInt(number);
-            if(number == numberInt) {
+            if(number === numberInt) {
                 if(isNaN(numberInt)) {
                     return false
                 }
@@ -149,23 +129,26 @@ class ChangeJackPotNumber extends React.Component {
 
         return (
             <React.Fragment>
-                <Header as='h2'>Jackpot Number</Header>
-                <Form className={successOrError}>
-                    <Form.Input label='Current jackpot' value={this.props.currentJackpotNumber}/>
-                    <Form.Input label='Amount to add' onChange={this.handleAddChange} value={this.state.addToCurrent}/>
-                    <Form.Input label='New jackpot number' onChange={this.handleChange} value={this.state.value}/>
-                    <Message
-                        success
-                        header='Jackpot number updated'
-                        content={`${this.state.value} has been set.`}
-                    />
-                    <Message
-                        error
-                        header='Please type in a valid number.'
-                        content='Do not use " , " or " $ " in the number.'
-                    />
-                    <Button loading={this.state.setNumberIsLoading} onClick={this.changeNumber}>Submit</Button>
-                </Form>
+                <Button onClick={()=>this.props.history.goBack()} labelPosition='left' icon='left chevron' content='Back' />
+                <Segment style={{padding: '20px 14px 40px 14px'}} raised>
+                    <Header as='h2'>Jackpot Number</Header>
+                    <Form className={successOrError}>
+                        <Form.Input label='Current jackpot' value={this.props.currentJackpotNumber}/>
+                        <Form.Input label='Amount to add' onChange={this.handleAddChange} value={this.state.addToCurrent}/>
+                        <Form.Input label='New jackpot number' onChange={this.handleChange} value={this.state.value}/>
+                        <Message
+                            success
+                            header='Jackpot number updated'
+                            content={`${this.state.value} has been set.`}
+                        />
+                        <Message
+                            error
+                            header='Please type in a valid number.'
+                            content='Do not use " , " or " $ " in the number.'
+                        />
+                        <Button loading={this.state.setNumberIsLoading} onClick={this.changeNumber}>Submit</Button>
+                    </Form>
+                </Segment>
             </React.Fragment>
         )
     }

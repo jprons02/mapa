@@ -46,7 +46,7 @@ class Login extends React.Component {
                         <Image style={{width: '38px', margin: 'auto', marginRight: '5px'}} src='/micc_logo.png' />Log-in to your account
                     </Header>
                     <Form error={this.state.hasError} size='large'>
-                        <Segment stacked>
+                        <Segment raised>
                         <Form.Input 
                             id="username" type="text" name="loginId" 
                             fluid icon='user' iconPosition='left' placeholder='Username' 

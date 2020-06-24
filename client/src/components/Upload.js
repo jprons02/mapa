@@ -4,7 +4,7 @@ import React from 'react';
 import {connect} from 'react-redux';
 import axios from 'axios';
 import {selectFile, uploadingFile, fetchList} from '../actions';
-import {Button, Header, Form} from 'semantic-ui-react';
+import {Button, Header, Form, Segment, List, Message} from 'semantic-ui-react';
 //below is socket.io for upload progress
 //import io from 'socket.io-client';
 //const socket = io('http://localhost:4000');
@@ -15,7 +15,11 @@ class Upload extends React.Component {
         super(props);
 
         this.state = {
-            value: ''
+            value: '',
+            isUploading: false,
+            showInvalidError: false,
+            showSuccessMessage: false,
+            fileUploaded: false
         }
     }
 
@@ -33,7 +37,8 @@ class Upload extends React.Component {
 
     uploadFile = async () => {
         if(this.props.selectedFile) {
-            this.props.uploadingFile(true);
+            //this.props.uploadingFile(true);
+            this.setState({isUploading: true})
             //need to use FormData for backend Multer middleware.
             let formData = new FormData();
             formData.append('myFile', this.props.selectedFile);
@@ -48,13 +53,17 @@ class Upload extends React.Component {
                 data: formData
             })
             if(response.data) {
-                this.props.uploadingFile(false);
-                this.props.selectFile(null);
+                this.setState({
+                    isUploading: false,
+                    fileUploaded: true
+                })
+                //this is why i can't show which got uploaded...
+                //this.props.selectFile(null);
                 this.props.fetchList();
             }
         }
         else {
-            alert("Please select a file.");
+            this.setState({showInvalidError: true})
         }
     }
 
@@ -67,31 +76,27 @@ class Upload extends React.Component {
     fileInputRef = React.createRef();
 
     renderUpload = () => {
+        const successOrError = this.state.fileUploaded ? 'success' : this.state.showInvalidError ? 'error' : '';
+
         return (
             <React.Fragment>
                 <Header as='h2'>Upload File</Header>
-                <Form style={{marginTop: '30px'}}>
-                    <div style={{marginBottom: '10px', 
-                        display: 
-                            this.props.isUploading === true ? 'none' : 
-                            this.props.isUploading === 'done' ? 'block' : 'none'}}>
-                            
-                        {this.props.selectedFile !== null ? `${this.props.selectedFile.name} has been uploaded.` : 'No file selected.'}
-                    </div>
+                <Form className={successOrError} style={{marginTop: '30px'}}>
                     <Form.Field>
                         <Button
-                            
                             content= {
-                                this.props.isUploading === 'done' ? 'Choose File' :
+                                //this.state.fileUploaded ? 'Choose File' :
                                 this.props.selectedFile === null ? 'Choose File' : 
-                                this.props.isUploading === false && this.props.selectedFile.name === false ? 'Choose File' :
+                                this.state.isUploading && this.props.selectedFile.name === false ? 'Choose File' :
                                 this.props.selectedFile.name ? this.props.selectedFile.name : 'Choose File'
                             }
-                                
                             labelPosition="left"
                             icon="file"
-                            onClick={() => this.fileInputRef.current.click()}
-                            loading={this.props.isUploading === true ? true : false}
+                            onClick={() => {
+                                this.setState({fileUploaded: false})
+                                this.fileInputRef.current.click()
+                            }}
+                            loading={this.state.isUploading}
                         />
                         <input
                             ref={this.fileInputRef}
@@ -101,8 +106,16 @@ class Upload extends React.Component {
                             onChange={this.handleChange}
                         />
                     </Form.Field>
+                    <Message
+                        success
+                        //header={`File has been uploaded.`}
+                        header={`${this.props.selectedFile.name} has been uploaded.`}
+                    />
+                    <Message
+                        error
+                        header='Please select a file'
+                    />
                     <Button onClick={this.uploadFile}>Upload</Button>
-                    
                 </Form>
             </React.Fragment>
         )
@@ -114,7 +127,18 @@ class Upload extends React.Component {
     render() {
         return (
             <React.Fragment>
-                {this.renderUpload()}
+                <Button onClick={()=>this.props.history.goBack()} labelPosition='left' icon='left chevron' content='Back' />
+                <Segment style={{padding: '20px 14px 40px 14px'}} raised>
+                    <div style={{paddingBottom: '20px'}}>
+                        <Header as='h4'>Instructions</Header>
+                        <List bulleted>
+                            <List.Item>To categorize as spanish please prefix file name with "sp_".<br/>Example: "sp_village.mov"</List.Item>
+                            <List.Item>To categorize as logo, please use the word "logo" somewhere in the filename, case insensitive.</List.Item>
+                            <List.Item>To categorize web banner, file must be zip.</List.Item>
+                        </List>
+                    </div>
+                    {this.renderUpload()}
+                </Segment>
             </React.Fragment>
         )
     }
@@ -128,3 +152,13 @@ export default connect(mapStateToProps,{selectFile, uploadingFile, fetchList})(U
 
 
 //add spinner to delete button until file is gone...
+
+/*
+                    <div style={{marginBottom: '10px', 
+                        display: 
+                            this.props.isUploading === true ? 'none' : 
+                            this.props.isUploading === 'done' ? 'block' : 'none'}}>
+                            
+                        {this.props.selectedFile !== null ? `${this.props.selectedFile.name} has been uploaded.` : 'No file selected.'}
+                    </div>
+*/

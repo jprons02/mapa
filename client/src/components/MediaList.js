@@ -7,7 +7,7 @@ import {connect} from 'react-redux';
 import axios from 'axios';
 import FileSaver from 'file-saver';
 import {fetchList, downloadingFile} from '../actions';
-import {Container, Icon, List, Header} from 'semantic-ui-react';
+import {Icon, List, Header, Segment, Button} from 'semantic-ui-react';
 
 class MediaList extends React.Component {
 
@@ -153,19 +153,22 @@ class MediaList extends React.Component {
     
     render() {
         return ( 
-            <Container>
-                <div id='downloading' style={{marginBottom: '30px', display: this.props.isDownloading ? 'block' : 'none' || 'none'}}>
-                    <Icon loading name='spinner' /> DOWNLOADING...
-                </div>
-                <div>
-                    <Header as='h2'>English</Header>
-                    {this.props.mediaList.entries ? this.renderList("english") : "loading list..."}
-                </div>
-                <div style={{marginTop: '60px'}}>
-                    <Header as='h2'>Spanish</Header>
-                    {this.props.mediaList.entries ? this.renderList("spanish") : "loading list..."}
-                </div>
-            </Container>
+            <React.Fragment>
+                <Button onClick={()=>this.props.history.goBack()} labelPosition='left' icon='left chevron' content='Back' />
+                <Segment style={{padding: '20px 14px 40px 14px'}} raised>
+                    <div id='downloading' style={{marginBottom: '30px', display: this.props.isDownloading ? 'block' : 'none' || 'none'}}>
+                        <Icon loading name='spinner' /> DOWNLOADING...
+                    </div>
+                    <div>
+                        <Header as='h2'>English</Header>
+                        {this.props.mediaList.entries ? this.renderList("english") : "loading list..."}
+                    </div>
+                    <div style={{marginTop: '60px'}}>
+                        <Header as='h2'>Spanish</Header>
+                        {this.props.mediaList.entries ? this.renderList("spanish") : "loading list..."}
+                    </div>
+                </Segment>
+            </React.Fragment>
             
         )
     }
