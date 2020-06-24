@@ -97,7 +97,6 @@ class ChangeJackPotNumber extends React.Component {
     }
 
     handleAddChange = (event) => {
-        console.log(event.target.value);
         this.setState({
             isSubmit: false,
             showInvalidError: false
@@ -116,7 +115,6 @@ class ChangeJackPotNumber extends React.Component {
     }
 
     calculateTotal = (amount) => {
-        console.log('calculate total fired...');
         if(parseInt(this.props.currentJackpotNumber) > 1) {
             const currentNumber = parseInt(this.props.currentJackpotNumber);
             const amountToAdd = amount === '' ? 0 : parseInt(amount);
