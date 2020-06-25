@@ -17,5 +17,5 @@ module.exports = {
     dropboxAccessToken: process.env.dropboxAccessToken,
     WP_CONSUMER_KEY: process.env.WP_CONSUMER_KEY,
     WP_CONSUMER_SECRET: process.env.WP_CONSUMER_SECRET,
-    gmailAppPassword: gmailAppPassword
+    gmailAppPassword: process.env.gmailAppPassword
 }
