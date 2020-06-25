@@ -16,7 +16,8 @@ class ChangeJackPotNumber extends React.Component {
             setNumberIsLoading: false,
             getNumberIsLoading: false,
             currentJackpotNumber: '',
-            addToCurrent: ''
+            addToCurrent: '',
+            buttonIsDisabled: true
         };
     }
 
@@ -24,42 +25,61 @@ class ChangeJackPotNumber extends React.Component {
         this.props.getCurrentJackpotNumber();
     }
 
-
+    //Sends input data to express server and then to update wordpress website
     changeNumber = async () => {
-        this.setState({setNumberIsLoading: true})
-        
-        console.log('number submitted.');
-        
-        const setURL = '/api/jackpotnumber';
-        const data = {
-            number: this.state.value
+        if(this.state.showInvalidError || this.state.value === '') {
+            return;
+        }
+        else {
+            this.setState({setNumberIsLoading: true})
+            
+            console.log('number submitted.');
+            
+            const setURL = '/api/jackpotnumber';
+            const data = {number: this.state.value}
+            
+            try {
+                const response = await axios({
+                    method: 'POST',
+                    url: setURL,
+                    data: data
+                })
+                if(response.data === 'OK') {
+                    console.log(response.data);
+                    this.setState({
+                        setNumberIsLoading: false,
+                        isSubmit: true
+                    })
+                    this.props.getCurrentJackpotNumber();
+                    this.sendEmail(data);
+                } else {
+                    alert('error, contact admin');
+                }
+            }
+            catch(error){
+                console.log(error);
+            }
         }
         
+    }
+
+    //Send email to admin with current jackpot number 
+    sendEmail = async (data) => {
+        const emailURL = '/api/emailcurrentjackpot';
         try {
             const response = await axios({
                 method: 'POST',
-                url: setURL,
+                url: emailURL,
                 data: data
             })
-            if(response.data === 'OK') {
-                console.log(response.data);
-                this.setState({
-                    setNumberIsLoading: false,
-                    isSubmit: true
-                })
-                this.props.getCurrentJackpotNumber();
-            } else {
-                alert('error, call admin');
-            }
+            console.log(response.data);
         }
         catch(error){
             console.log(error);
         }
-            
-        
     }
 
-    
+    //Validates the number inputed. Only accepts numbers.
     validateNumber = (number) => {
         if(number === '') {
             return true;
@@ -67,9 +87,9 @@ class ChangeJackPotNumber extends React.Component {
             return false;
         }
         else {
-            //if you pareInt a non number you get NaN
-            //need to keep == in stead of === so you can compare string number to int number.
-            //if you parseInt(123aaa) you will get 123.
+            //Need to keep == in stead of === so you can compare string number to int number.
+            //If you parseInt a non number you get NaN.
+            //If you parseInt(123aaa) you will get 123.
             const numberInt = parseInt(number);
             if(number == numberInt) {
                 if(isNaN(numberInt)) {
@@ -84,22 +104,29 @@ class ChangeJackPotNumber extends React.Component {
         
     }
 
+    //Fires when new jackpot number field is typed in directly
     handleChange = (event) => {
         this.setState({
             isSubmit: false,
-            showInvalidError: false
+            showInvalidError: false,
+            buttonIsDisabled: false
         })
         if(this.validateNumber(event.target.value)) {
             this.setState({value: event.target.value})
         } else {
-            this.setState({showInvalidError: true})
+            this.setState({
+                showInvalidError: true,
+                buttonIsDisabled: true
+            })
         }
     }
 
+    //Fires when amount to add field is typed in
     handleAddChange = (event) => {
         this.setState({
             isSubmit: false,
-            showInvalidError: false
+            showInvalidError: false,
+            buttonIsDisabled: false
         })
         
         if(this.validateNumber(event.target.value)) {
@@ -109,11 +136,15 @@ class ChangeJackPotNumber extends React.Component {
 
             this.calculateTotal(event.target.value);
         } else {
-            this.setState({showInvalidError: true})
+            this.setState({
+                showInvalidError: true,
+                buttonIsDisabled: true
+            })
         }
         
     }
 
+    //Calculates: (amount to add field) + (current jackpot numbers)
     calculateTotal = (amount) => {
         if(parseInt(this.props.currentJackpotNumber) > 1) {
             const currentNumber = parseInt(this.props.currentJackpotNumber);
@@ -126,7 +157,6 @@ class ChangeJackPotNumber extends React.Component {
 
 
     
-
 
     render() {
         const successOrError = this.state.isSubmit ? 'success' : this.state.showInvalidError ? 'error' : '';
@@ -150,7 +180,7 @@ class ChangeJackPotNumber extends React.Component {
                             header='Please type in a valid number.'
                             content='Do not use " , " or " $ " in the number.'
                         />
-                        <Button loading={this.state.setNumberIsLoading} onClick={this.changeNumber}>Submit</Button>
+                        <Button disabled={this.state.value === '' ? true : this.state.buttonIsDisabled} loading={this.state.setNumberIsLoading} onClick={this.changeNumber}>Submit</Button>
                     </Form>
                 </Segment>
             </React.Fragment>

@@ -6,6 +6,12 @@ import {Container, Header, Card} from 'semantic-ui-react';
 
 class Home extends React.Component {
 
+    componentDidMount() {
+        if(!this.props.isSignedIn.isMatch) {
+            this.props.history.push('/login');
+        }
+    }
+
     toolsObj = () => {
         return [
             {
