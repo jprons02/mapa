@@ -9,16 +9,14 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-What things you need to install the software and how to install them
+Items you need to install
 
 * node 12.x
 * npm: 6.x
-* yarn: 1.x
+* yarn: 1.x (not needed if symantic ui react will work with create-react-app)
 
 
 ### Installing
-
-A step by step series of examples that tell you how to get a development env running
 
 * ```npm install``` on root directory
 * Create dev.js file in config directory
