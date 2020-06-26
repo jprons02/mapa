@@ -50,5 +50,5 @@ Add additional notes about how to deploy this on a live system
 
 ## Acknowledgments
 
-* [adasq](https://github.com/adasq) and their [dropbox api wrapper](https://github.com/adasq/dropbox-v2-api)
+* [adasq](https://github.com/adasq) for support with their [dropbox api wrapper](https://github.com/adasq/dropbox-v2-api)
 
