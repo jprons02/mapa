@@ -20,14 +20,19 @@ What things you need to install the software and how to install them
 
 A step by step series of examples that tell you how to get a development env running
 
-Say what the step will be
-
-```
-npm install
-```
-
-
-End with an example of getting some data out of the system or using it for a little demo
+* ```npm install``` on root directory
+* Create dev.js file in config directory
+  * Place all keys here to run program locally (dev.js should be listed in .gitignore)
+    * mongoURI - To connect to mongoDB, adding users
+    * googleClientID - Google OAuth functionality with passport service
+    * googleClientSecret - Google OAuth functionality with passport service 
+    * cookieKey - Google OAuth functionality with passport service
+    * dropboxAccessToken - upload/list/delete routes
+    * WP_CONSUMER_KEY - change wordpress shortcode variables
+    * WP_CONSUMER_SECRET - change wordpress shortcode variables 
+    * gmailAppPassword - used for nodemailer in nodejs
+* ```npm install``` on client directory
+* ```npm run dev``` on root directory to start application
 
 ## Deployment
 
