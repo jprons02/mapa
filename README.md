@@ -6,7 +6,7 @@
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
 
 ### Prerequisites
 
@@ -32,10 +32,6 @@ Items you need to install
     * gmailAppPassword - used for nodemailer in nodejs
 * ```npm install``` on client directory
 * ```npm run dev``` on root directory to start application
-
-## Deployment
-
-Add additional notes about how to deploy this on a live system
 
 ## Built With
 
