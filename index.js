@@ -67,6 +67,10 @@ app.use('/admin/tools/backend', (req, res) => {
     res.sendFile(__dirname + '/index.html');
 });
 
+app.use('/privacypolicy', (req, res) => {
+    res.sendFile(__dirname + '/privacypolicy.html');
+});
+
 
 if(process.env.NODE_ENV === 'production') {
     //express will serve up production assets like our main.js file or main.css file
