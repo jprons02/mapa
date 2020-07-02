@@ -5,6 +5,7 @@ import signInReducer from './signInReducer';
 import downloadingStatusReducer from './downloadingStatusReducer';
 import uploadingStatusReducer from './uploadingStatusReducer';
 import currentJackpotNumberReducer from './currentJackpotNumberReducer';
+import gaTokenReducer from './gaTokenReducer';
 
 export default combineReducers ({
     mediaList: mediaListReducer,
@@ -12,5 +13,6 @@ export default combineReducers ({
     isSignedIn: signInReducer,
     isDownloading: downloadingStatusReducer,
     isUploading: uploadingStatusReducer,
-    currentJackpotNumber : currentJackpotNumberReducer
+    currentJackpotNumber: currentJackpotNumberReducer,
+    gaToken: gaTokenReducer
 });

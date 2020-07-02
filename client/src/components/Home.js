@@ -23,6 +23,14 @@ class Home extends React.Component {
                 path: '/adduser'
             },
             {
+                id: 'googleAnalytics',    
+                minUser: 'admin',
+                name: 'Google Analytics',
+                meta: 'Admin',
+                description: 'View Google Analytics tools',
+                path: '/ga'
+            },
+            {
                 id: 'jackpot',
                 minUser: 'design',
                 name: 'Jackpot',

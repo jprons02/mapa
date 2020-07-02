@@ -11,6 +11,7 @@ import AddUser from './AddUser';
 import ChangeJackpotNumber from './ChangeJackpotNumber';
 import Upload from './Upload';
 import Delete from './Delete';
+import GaViewReport from './GaViewReport';
 
 
 class App extends React.Component {
@@ -28,6 +29,7 @@ class App extends React.Component {
                         <Route exact path="/upload" component={Upload} />
                         <Route exact path="/delete" component={Delete} />
                         <Route exact path="/medialist" component={MediaList} />
+                        <Route exact path="/ga" component={GaViewReport} />
                     </Container>
                 </BrowserRouter>
             </React.Fragment>

@@ -3,7 +3,6 @@ const mongoose = require('mongoose');
 const keys = require('./config/keys');
 const passport = require('passport');
 const cookieSession = require('cookie-session');
-const privateKey = require("./google_key.json");
 
 //require models to initialize them.
 //require passport AFTER models are initialized.
@@ -16,7 +15,7 @@ const loginRoute = require('./routes/login');
 const googleOAuthRoute = require('./routes/googleAuthRoutes');
 const dropboxRoutes = require('./routes/dropboxRoutes');
 const jackpotNumberRoutes = require('./routes/jackpotNumberRoutes');
-const googleAnalyticsServiceRoute = require('./routes/googleAnalyticsServiceRoute');
+const gaRoutes = require('./routes/gaRoutes');
 
 
 mongoose
@@ -64,7 +63,7 @@ googleOAuthRoute(app);
 //dropboxRoutes(app, io);
 dropboxRoutes(app);
 jackpotNumberRoutes(app);
-googleAnalyticsServiceRoute(app);
+gaRoutes(app);
 
 
 app.use('/admin/tools/backend', (req, res) => {

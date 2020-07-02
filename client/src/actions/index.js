@@ -5,6 +5,7 @@ import {SIGN_IN} from './types';
 import {DOWNLOADING_FILE} from './types';
 import {UPLOADING_FILE} from './types';
 import {CURRENT_JACKPOT_NUMBER} from './types';
+import {GA_TOKEN} from './types';
 
 export const fetchList = () => async dispatch => {
     const res = await axios.get('/api/list-content/media');
@@ -50,4 +51,10 @@ export const uploadingFile = value => {
     return {
         type: UPLOADING_FILE, payload: value
     }
+}
+
+export const getGaToken = () => async dispatch => {
+    const res = await axios.get('/api/accessTokens');
+    
+    dispatch({type: GA_TOKEN, payload: res.data});
 }
