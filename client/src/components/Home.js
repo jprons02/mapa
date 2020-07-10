@@ -24,7 +24,7 @@ class Home extends React.Component {
             },
             {
                 id: 'googleAnalytics',    
-                minUser: 'admin',
+                minUser: 'design',
                 name: 'Google Analytics',
                 meta: 'Admin',
                 description: 'View Google Analytics tools',

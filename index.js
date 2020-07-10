@@ -15,7 +15,7 @@ const loginRoute = require('./routes/login');
 const googleOAuthRoute = require('./routes/googleAuthRoutes');
 const dropboxRoutes = require('./routes/dropboxRoutes');
 const jackpotNumberRoutes = require('./routes/jackpotNumberRoutes');
-const gaRoutes = require('./routes/gaRoutes');
+//const gaRoutes = require('./routes/gaRoutes');
 
 
 mongoose
@@ -63,29 +63,19 @@ googleOAuthRoute(app);
 //dropboxRoutes(app, io);
 dropboxRoutes(app);
 jackpotNumberRoutes(app);
-gaRoutes(app);
+//gaRoutes(app);
 
 
+//Do not enable (for security purposes) unless need to add user without front end. Make sure to disable again.
+/*
 app.use('/admin/tools/backend', (req, res) => {
     res.sendFile(__dirname + '/index.html');
 });
+*/
 
 app.use('/privacypolicy', (req, res) => {
     res.sendFile(__dirname + '/privacypolicy.html');
 });
-
-app.use('/googleatest', (req, res) => {
-    res.sendFile(__dirname + '/HelloAnalytics.html');
-});
-
-app.use('/gaTest1', (req, res) => {
-    res.sendFile(__dirname + '/gaTest1.html');
-});
-
-app.use('/gaTest2', (req, res) => {
-    res.sendFile(__dirname + '/gaTest2.html');
-});
-
 
 
 if(process.env.NODE_ENV === 'production') {
