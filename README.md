@@ -3,6 +3,7 @@
 * Login
 * Front end for upload/download/deleting files from dropbox
 * Update shortcode variable values for wordpress website
+* Google Analytics views - embedded from Google Sheets reports
 
 ## Getting Started
 
