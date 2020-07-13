@@ -1,5 +1,5 @@
 import React from 'react';
-import {Button, Segment, Form, Loader} from 'semantic-ui-react';
+import {Button, Segment, Form, Loader, Header} from 'semantic-ui-react';
 
 class GaViewReport extends React.Component {
     constructor(props) {
@@ -125,6 +125,7 @@ class GaViewReport extends React.Component {
             <React.Fragment>
                 <Button onClick={()=>this.props.history.push('/')} labelPosition='left' icon='left chevron' content='Back' />
                 <Segment style={{padding: '20px 14px 40px 14px'}} raised>
+                    <Header as='h2'>Website Analytics</Header>
                     <Form>
                         <Form.Group>
                             <Form.Select 
