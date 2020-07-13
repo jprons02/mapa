@@ -16,7 +16,7 @@ class Home extends React.Component {
         return [
             {
                 id: 'addUser',    
-                minUser: 'admin',
+                access: 'admin',
                 name: 'Add User',
                 meta: 'Admin',
                 description: 'Create a new user to use mapa tools.',
@@ -24,23 +24,23 @@ class Home extends React.Component {
             },
             {
                 id: 'googleAnalytics',    
-                minUser: 'design',
+                access: 'mapa',
                 name: 'Google Analytics',
-                meta: 'Admin',
-                description: 'View Google Analytics tools',
+                meta: 'Administration',
+                description: 'View Google Analytics tools.',
                 path: '/ga'
             },
             {
                 id: 'jackpot',
-                minUser: 'design',
+                access: 'design',
                 name: 'Jackpot',
-                meta: 'Design',
+                meta: 'Web',
                 description: 'Change the daily jackpot number on the website.',
                 path: '/jackpot'
             },
             {
                 id: 'upload',
-                minUser: 'design',
+                access: 'design',
                 name: 'Upload',
                 meta: 'Design',
                 description: 'Upload TV spots, radio spots, web banners and/or logos for media partners to download.',
@@ -48,7 +48,7 @@ class Home extends React.Component {
             },
             {    
                 id: 'delete',
-                minUser: 'design',
+                access: 'design',
                 name: 'Delete',
                 meta: 'Design',
                 description: 'Delete files from media list.',
@@ -56,9 +56,9 @@ class Home extends React.Component {
             },
             {
                 id: 'downloadMedia',
-                minUser: 'media',
+                access: 'media',
                 name: 'Media List',
-                meta: 'Media',
+                meta: 'Media Partner',
                 description: 'View list of available media to download.',
                 path: '/medialist'  
             }
@@ -67,20 +67,30 @@ class Home extends React.Component {
 
     renderTools = () => {
         let availableTools = [];
+        //Admin user
         if(this.props.isSignedIn.username === 'admin') {
             availableTools = this.toolsObj();
         }
+        //Designers
         else if(this.props.isSignedIn.username === 'design') {
-            const checkMinUser = (tool) => {
-                return tool.minUser !== 'admin';
+            const availableToolsFilter = (tool) => {
+                return tool.access !== 'admin';
             }
-            availableTools = this.toolsObj().filter(checkMinUser);
+            availableTools = this.toolsObj().filter(availableToolsFilter);
         }
-        else if(this.props.isSignedIn.username === 'media') {
-            const checkMinUser = (tool) => {
-                return tool.minUser !== 'admin' && tool.minUser !== 'design';
+        //Mapa
+        else if(this.props.isSignedIn.username === 'mapa') {
+            const availableToolsFilter = (tool) => {
+                return tool.access !== 'admin' && tool.access !== 'design';
             }
-            availableTools = this.toolsObj().filter(checkMinUser);
+            availableTools = this.toolsObj().filter(availableToolsFilter);
+        }
+        //Media Partners
+        else if(this.props.isSignedIn.username === 'media') {
+            const availableToolsFilter = (tool) => {
+                return tool.access !== 'admin' && tool.access !== 'design' && tool.access != 'mapa';
+            }
+            availableTools = this.toolsObj().filter(availableToolsFilter);
         }
 
         return (
@@ -104,8 +114,9 @@ class Home extends React.Component {
         return (
             <Container>
                 <Header as='h2'>{
-                    this.props.isSignedIn.username === 'admin' ? 'Welcome Admin' : 
+                    this.props.isSignedIn.username === 'admin' ? 'Welcome Joey' : 
                     this.props.isSignedIn.username === 'design' ? 'Welcome Design Team' :
+                    this.props.isSignedIn.username === 'mapa' ? 'Welcome MAPA Administration' :
                     this.props.isSignedIn.username === 'media' ? 'Welcome Media Partner' : 'Welcome'}
                 </Header>
                 <Header as='h4'>Tools Available</Header>

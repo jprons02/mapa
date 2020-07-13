@@ -148,16 +148,3 @@ const mapStateToProps = (state) => {
 }
 
 export default connect(mapStateToProps,{selectFile, uploadingFile, fetchList})(Upload);
-
-
-//add spinner to delete button until file is gone...
-
-/*
-                    <div style={{marginBottom: '10px', 
-                        display: 
-                            this.props.isUploading === true ? 'none' : 
-                            this.props.isUploading === 'done' ? 'block' : 'none'}}>
-                            
-                        {this.props.selectedFile !== null ? `${this.props.selectedFile.name} has been uploaded.` : 'No file selected.'}
-                    </div>
-*/
