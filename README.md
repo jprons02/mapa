@@ -41,6 +41,7 @@ Items you need to install
 * [React](https://reactjs.org/) - Front end JavaScript Library
 * [NodeJs](https://nodejs.org/en/) - Back end
 * [NPM](https://www.npmjs.com/get-npm) - Dependency Management
+* [Semantic UI React](https://react.semantic-ui.com/) - Styling
 
 ## Authors
 
