@@ -15,8 +15,6 @@ Items you need to install
 
 * node 12.x
 * npm: 6.x
-* yarn: 1.x (not needed if symantic ui react will work with create-react-app)
-
 
 ### Installing
 
