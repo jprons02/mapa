@@ -1,11 +1,12 @@
 const axios = require("axios");
 const nodemailer = require("nodemailer");
-const { WP_CONSUMER_KEY } = require("../config/keys");
-const { WP_CONSUMER_SECRET } = require("../config/keys");
-const { gmailAppPassword } = require("../config/keys");
+const {
+  WP_CONSUMER_KEY,
+  WP_CONSUMER_SECRET,
+  gmailAppPassword,
+} = require("../../../config/keys");
 
 module.exports = (app) => {
-  console.log(WP_CONSUMER_KEY);
   //This route sets the jackpot number in wordpress database.
   //It sends the post data to wordpress custom endpoint (found in the respective website child theme functions.php file)
   app.post("/api/jackpotnumber", async (req, res, next) => {
