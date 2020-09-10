@@ -51,12 +51,14 @@ class MonthlyJackPotNumber extends React.Component {
   //Flush cache pupeteer automation
   flushCache = async () => {
     const response = await axios.get("/api/p/flushcache");
-    if (response.data === "CACHE FLUSHED!") {
-      console.log(response.data);
+    if (response.data) {
       this.setState({
         setNumberIsLoading: false,
         isSubmit: true,
       });
+    }
+    if (response.data === "CACHE FLUSHED!") {
+      console.log(response.data);
     } else {
       console.log("ERROR, CACHE NOT FLUSHED");
     }
