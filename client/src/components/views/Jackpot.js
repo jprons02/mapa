@@ -36,10 +36,7 @@ class Jackpot extends React.Component {
         />
         <Segment style={{ padding: "20px 14px 40px 14px" }} raised>
           <Header as="h2">Jackpots</Header>
-          <Tab
-            menu={{ fluid: true, vertical: true, tabular: true }}
-            panes={this.panes()}
-          />
+          <Tab panes={this.panes()} />
         </Segment>
       </React.Fragment>
     );
