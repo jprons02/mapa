@@ -1,6 +1,6 @@
 import React from "react";
 import axios from "axios";
-import { Button, Header, Form, Message, Segment } from "semantic-ui-react";
+import { Button, Form, Message } from "semantic-ui-react";
 import validateNumber from "../../utility/validateNumber";
 
 class MonthlyJackPotNumber extends React.Component {
@@ -38,16 +38,27 @@ class MonthlyJackPotNumber extends React.Component {
         });
         if (response.data === "OK") {
           console.log(response.data);
-          this.setState({
-            setNumberIsLoading: false,
-            isSubmit: true,
-          });
+          this.flushCache();
         } else {
           alert("error, contact admin");
         }
       } catch (error) {
         console.log(error);
       }
+    }
+  };
+
+  //Flush cache pupeteer automation
+  flushCache = async () => {
+    const response = await axios.get("/api/p/flushcache");
+    if (response.data === "CACHE FLUSHED!") {
+      console.log(response.data);
+      this.setState({
+        setNumberIsLoading: false,
+        isSubmit: true,
+      });
+    } else {
+      console.log("ERROR, CACHE NOT FLUSHED");
     }
   };
 

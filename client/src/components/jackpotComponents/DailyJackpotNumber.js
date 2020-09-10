@@ -2,7 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import { getCurrentJackpotNumber } from "../../actions";
 import axios from "axios";
-import { Button, Header, Form, Message, Segment } from "semantic-ui-react";
+import { Button, Form, Message } from "semantic-ui-react";
 import validateNumber from "../../utility/validateNumber";
 
 class DailyJackPotNumber extends React.Component {
@@ -43,11 +43,7 @@ class DailyJackPotNumber extends React.Component {
           data: data,
         });
         if (response.data === "OK") {
-          console.log(response.data);
-          this.setState({
-            setNumberIsLoading: false,
-            isSubmit: true,
-          });
+          this.flushCache();
           this.props.getCurrentJackpotNumber();
           this.sendEmail(data);
         } else {
@@ -71,6 +67,20 @@ class DailyJackPotNumber extends React.Component {
       console.log(response.data);
     } catch (error) {
       console.log(error);
+    }
+  };
+
+  //Flush cache pupeteer automation
+  flushCache = async () => {
+    const response = await axios.get("/api/p/flushcache");
+    if (response.data === "CACHE FLUSHED!") {
+      console.log(response.data);
+      this.setState({
+        setNumberIsLoading: false,
+        isSubmit: true,
+      });
+    } else {
+      console.log("ERROR, CACHE NOT FLUSHED");
     }
   };
 

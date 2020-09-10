@@ -15,6 +15,7 @@ const loginRoute = require("./routes/login");
 const googleOAuthRoute = require("./routes/googleAuthRoutes");
 const dropboxRoutes = require("./routes/dropboxRoutes");
 const wordpressRoutes = require("./routes/wordpressRoutes");
+const pupeteerRoutes = require("./routes/pupeteerRoutes");
 //const gaRoutes = require('./routes/gaRoutes');
 
 mongoose
@@ -60,6 +61,7 @@ googleOAuthRoute(app);
 //dropboxRoutes(app, io);
 dropboxRoutes(app);
 wordpressRoutes(app);
+pupeteerRoutes(app);
 //gaRoutes(app);
 
 //Do not enable (for security purposes) unless need to add user without front end. Make sure to disable again.
