@@ -26,7 +26,7 @@ module.exports = (app) => {
       for (const website of websites) {
         //headless: false will open a browser and show the automation
         try {
-          const browser = await puppeteer.launch({ headless: false });
+          const browser = await puppeteer.launch({ headless: true });
           const page = await browser.newPage();
           await page.goto("https://app.getflywheel.com/login");
           await page.type("#username", flywheelID);
